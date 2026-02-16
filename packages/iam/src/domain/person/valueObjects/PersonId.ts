@@ -23,9 +23,3 @@ export class PersonId extends StringValueObject {
     return new PersonId(value);
   }
 }
-
-export enum Role {
-  Student = "Student",
-  Faculty = "Faculty",
-  Admin = "Admin",
-}
