@@ -1,0 +1,77 @@
+🟢 Provisioning / Creation
+
+CreateStudentFromExternalAuth
+Creates a new Person with a Student role when a student authenticates via an external identity provider for the first time.
+
+CreateFacultyFromExternalAuth
+Creates a new Person with a Faculty role from an external authentication account.
+
+CreateAdmin
+Explicitly provisions an administrative Person with elevated privileges.
+
+🔵 External Authentication Linking
+
+LinkExternalAuthAccount
+Links an existing Person to an external authentication account after successful login.
+
+UnlinkExternalAuthAccount
+Removes the association between a Person and an external authentication account.
+
+🟣 Role Assignment & Management
+
+AssignStudentRole
+Assigns the Student role to an existing Person and creates the corresponding StudentProfile.
+
+AssignFacultyRole
+Assigns the Faculty role to an existing Person and creates the corresponding FacultyProfile.
+
+AssignAdminRole
+Assigns the Admin role to an existing Person and creates the corresponding AdminProfile.
+
+DeactivateRole
+Deactivates a specific role for a Person without deactivating the Person itself.
+
+ReactivateRole
+Reactivates a previously deactivated role for a Person.
+
+🔴 Person Lifecycle Management
+
+ActivatePerson
+Marks a Person as active and eligible to participate in the system.
+
+DeactivatePerson
+Deactivates a Person, preventing all system interactions regardless of role.
+
+🟡 Identity & Profile Updates
+
+UpdateContactInformation
+Updates a Person’s contact details such as phone number or address.
+
+UpdateDemographics
+Updates core identity attributes such as pronouns, gender, sex, or birthday.
+
+UpdateEmail
+Changes the primary email address associated with a Person.
+
+UpdateUniversityId
+Updates the institution-specific identifier for a Person.
+
+UpdateStudentProfile
+Updates academic information specific to a StudentProfile.
+
+UpdateFacultyProfile
+Updates department or title information for a FacultyProfile.
+
+UpdateAdminProfile
+Updates job-related metadata for an AdminProfile.
+
+🔹 Authorization / Read-Only Queries (Often Read Models)
+
+GetPersonAuthorizationSnapshot
+Returns the current roles and active states for a Person for authorization checks.
+
+CheckPersonHasRole
+Determines whether a Person currently holds a specific role.
+
+CheckPersonIsActive
+Indicates whether a Person is globally active in the system.

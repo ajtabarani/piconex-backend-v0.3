@@ -1,4 +1,5 @@
 import {
+  Address,
   AdminProfile,
   FacultyProfile,
   PersonId,
@@ -19,17 +20,42 @@ export class Person {
   private constructor(
     private readonly personId: PersonId,
     private readonly externalAuthId: string | null,
+
     private universityId: string | null,
+
     private firstName: string,
+    private preferredName: string | null,
+    private middleName: string | null,
     private lastName: string,
+
     private email: string,
+    private phoneNumber: string | null,
+
+    private pronouns: string | null,
+    private sex: string | null,
+    private gender: string | null,
+
+    private birthday: Date | null,
+
+    private address: Address | null,
+
     roles: Role[],
     state: PersonState,
-    private createdAt: Date,
+
+    private readonly createdAt: Date,
     private updatedAt: Date,
+    private importJobId: string | null,
   ) {
     if (roles.length === 0) {
       throw new Error("Person must have at least one role");
+    }
+
+    if (!firstName || !lastName) {
+      throw new Error("First and last name are required");
+    }
+
+    if (!email) {
+      throw new Error("Email is required");
     }
 
     this.roles = new Set(roles);
@@ -41,11 +67,20 @@ export class Person {
     personId: PersonId,
     universityId: string,
     firstName: string,
+    preferredName: string | null,
+    middleName: string | null,
     lastName: string,
     email: string,
+    phoneNumber: string | null,
+    pronouns: string | null,
+    sex: string | null,
+    gender: string | null,
+    birthday: Date | null,
+    address: Address | null,
     universityProgram: string | null,
     academicLevel: string | null,
     yearOfStudy: string | null,
+    importJobId: string,
   ): Person {
     const now = new Date();
 
@@ -54,12 +89,21 @@ export class Person {
       null,
       universityId,
       firstName,
+      preferredName,
+      middleName,
       lastName,
       email,
+      phoneNumber,
+      pronouns,
+      sex,
+      gender,
+      birthday,
+      address,
       [Role.Student],
       PersonState.Active,
       now,
       now,
+      importJobId,
     );
 
     person.studentProfile = new StudentProfile(
@@ -76,9 +120,18 @@ export class Person {
   static createStudentFromExternalAuth(
     personId: PersonId,
     externalAuthId: string,
+    universityId: string | null,
     firstName: string,
+    preferredName: string | null,
+    middleName: string | null,
     lastName: string,
     email: string,
+    phoneNumber: string | null,
+    pronouns: string | null,
+    sex: string | null,
+    gender: string | null,
+    birthday: Date | null,
+    address: Address | null,
     universityProgram: string | null,
     academicLevel: string | null,
     yearOfStudy: string | null,
@@ -88,14 +141,23 @@ export class Person {
     const person = new Person(
       personId,
       externalAuthId,
-      null,
+      universityId,
       firstName,
+      preferredName,
+      middleName,
       lastName,
       email,
+      phoneNumber,
+      pronouns,
+      sex,
+      gender,
+      birthday,
+      address,
       [Role.Student],
       PersonState.Active,
       now,
       now,
+      null,
     );
 
     person.studentProfile = new StudentProfile(
@@ -113,10 +175,19 @@ export class Person {
     personId: PersonId,
     universityId: string,
     firstName: string,
+    preferredName: string | null,
+    middleName: string | null,
     lastName: string,
     email: string,
+    phoneNumber: string | null,
+    pronouns: string | null,
+    sex: string | null,
+    gender: string | null,
+    birthday: Date | null,
+    address: Address | null,
     department: string | null,
     title: string | null,
+    importJobId: string,
   ): Person {
     const now = new Date();
 
@@ -125,12 +196,21 @@ export class Person {
       null,
       universityId,
       firstName,
+      preferredName,
+      middleName,
       lastName,
       email,
+      phoneNumber,
+      pronouns,
+      sex,
+      gender,
+      birthday,
+      address,
       [Role.Faculty],
       PersonState.Active,
       now,
       now,
+      importJobId,
     );
 
     person.facultyProfile = new FacultyProfile(
@@ -146,28 +226,48 @@ export class Person {
   static createFacultyFromExternalAuth(
     personId: PersonId,
     externalAuthId: string,
+    universityId: string | null,
     firstName: string,
+    preferredName: string | null,
+    middleName: string | null,
     lastName: string,
     email: string,
+    phoneNumber: string | null,
+    pronouns: string | null,
+    sex: string | null,
+    gender: string | null,
+    birthday: Date | null,
+    address: Address | null,
+    department: string | null,
+    title: string | null,
   ): Person {
     const now = new Date();
 
     const person = new Person(
       personId,
       externalAuthId,
-      null,
+      universityId,
       firstName,
+      preferredName,
+      middleName,
       lastName,
       email,
+      phoneNumber,
+      pronouns,
+      sex,
+      gender,
+      birthday,
+      address,
       [Role.Faculty],
       PersonState.Active,
       now,
       now,
+      null,
     );
 
     person.facultyProfile = new FacultyProfile(
-      null,
-      null,
+      department,
+      title,
       RoleState.Active,
       now,
     );
@@ -178,9 +278,18 @@ export class Person {
   static createAdmin(
     personId: PersonId,
     externalAuthId: string,
+    universityId: string | null,
     firstName: string,
+    preferredName: string | null,
+    middleName: string | null,
     lastName: string,
     email: string,
+    phoneNumber: string | null,
+    pronouns: string | null,
+    sex: string | null,
+    gender: string | null,
+    birthday: Date | null,
+    address: Address | null,
     jobTitle: string | null,
     department: string | null,
     specialization: string | null,
@@ -190,14 +299,23 @@ export class Person {
     const person = new Person(
       personId,
       externalAuthId,
-      null,
+      universityId,
       firstName,
+      preferredName,
+      middleName,
       lastName,
       email,
+      phoneNumber,
+      pronouns,
+      sex,
+      gender,
+      birthday,
+      address,
       [Role.Admin],
       PersonState.Active,
       now,
       now,
+      null,
     );
 
     person.adminProfile = new AdminProfile(
