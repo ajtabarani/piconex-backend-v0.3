@@ -1,4 +1,4 @@
-import { PersonId, PersonRepository, Role } from "../..";
+import { PersonId, PersonRepository, Role } from "../../..";
 
 export interface TransferSuperAdminOwnershipRequest {
   newSuperAdminId: PersonId;
