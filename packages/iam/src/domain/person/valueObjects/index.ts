@@ -6,5 +6,5 @@ export * from "./FacultyProfile";
 
 export * from "./PersonState";
 export * from "./RoleState";
-export * from "./PersonId";
+export * from "./valueObjects";
 export * from "./Role";

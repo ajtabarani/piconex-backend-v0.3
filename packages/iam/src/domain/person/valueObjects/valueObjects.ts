@@ -23,3 +23,23 @@ export class PersonId extends StringValueObject {
     return new PersonId(value);
   }
 }
+
+export class ExternalAuthId extends StringValueObject {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value: string): ExternalAuthId {
+    return new ExternalAuthId(value);
+  }
+}
+
+export class UniversityId extends StringValueObject {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value: string): UniversityId {
+    return new UniversityId(value);
+  }
+}

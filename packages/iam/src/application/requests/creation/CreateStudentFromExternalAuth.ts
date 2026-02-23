@@ -1,9 +1,16 @@
-import { Address, Person, PersonId, PersonRepository } from "../../..";
+import {
+  Address,
+  ExternalAuthId,
+  Person,
+  PersonId,
+  PersonRepository,
+  UniversityId,
+} from "../../..";
 
 export interface CreateStudentFromExternalAuthRequest {
   personId: PersonId;
-  externalAuthId: string;
-  universityId: string | null;
+  externalAuthId: ExternalAuthId;
+  universityId: UniversityId | null;
 
   firstName: string;
   preferredName: string | null;

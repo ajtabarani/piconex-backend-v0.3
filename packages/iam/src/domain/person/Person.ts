@@ -1,12 +1,14 @@
 import {
   Address,
   AdminProfile,
+  ExternalAuthId,
   FacultyProfile,
   PersonId,
   PersonState,
   Role,
   RoleState,
   StudentProfile,
+  UniversityId,
 } from ".";
 
 export class Person {
@@ -19,8 +21,8 @@ export class Person {
 
   private constructor(
     private readonly personId: PersonId,
-    private externalAuthId: string | null,
-    private universityId: string | null,
+    private externalAuthId: ExternalAuthId | null,
+    private universityId: UniversityId | null,
     private isSuperAdmin: boolean,
 
     private firstName: string,
@@ -66,7 +68,7 @@ export class Person {
   // Factories
   static createImportedStudent(
     personId: PersonId,
-    universityId: string,
+    universityId: UniversityId,
     firstName: string,
     preferredName: string | null,
     middleName: string | null,
@@ -119,8 +121,8 @@ export class Person {
 
   static createStudentFromExternalAuth(
     personId: PersonId,
-    externalAuthId: string,
-    universityId: string | null,
+    externalAuthId: ExternalAuthId,
+    universityId: UniversityId | null,
     firstName: string,
     preferredName: string | null,
     middleName: string | null,
@@ -172,7 +174,7 @@ export class Person {
 
   static createImportedFaculty(
     personId: PersonId,
-    universityId: string,
+    universityId: UniversityId,
     firstName: string,
     preferredName: string | null,
     middleName: string | null,
@@ -220,8 +222,8 @@ export class Person {
 
   static createFacultyFromExternalAuth(
     personId: PersonId,
-    externalAuthId: string,
-    universityId: string | null,
+    externalAuthId: ExternalAuthId,
+    universityId: UniversityId | null,
     firstName: string,
     preferredName: string | null,
     middleName: string | null,
@@ -268,8 +270,8 @@ export class Person {
 
   static createAdmin(
     personId: PersonId,
-    externalAuthId: string,
-    universityId: string | null,
+    externalAuthId: ExternalAuthId,
+    universityId: UniversityId | null,
     firstName: string,
     preferredName: string | null,
     middleName: string | null,
@@ -321,8 +323,8 @@ export class Person {
 
   static restore(
     personId: PersonId,
-    externalAuthId: string | null,
-    universityId: string | null,
+    externalAuthId: ExternalAuthId | null,
+    universityId: UniversityId | null,
     isSuperAdmin: boolean,
 
     firstName: string,
@@ -389,6 +391,33 @@ export class Person {
 
   activate(): void {
     this.state = PersonState.Active;
+    this.updatedAt = new Date();
+  }
+
+  linkExternalAuth(externalAuthId: ExternalAuthId): void {
+    if (this.externalAuthId) {
+      throw new Error("External auth already linked");
+    }
+
+    this.externalAuthId = externalAuthId;
+    this.updatedAt = new Date();
+  }
+
+  unlinkExternalAuth(): void {
+    if (!this.externalAuthId) {
+      throw new Error("No external auth linked");
+    }
+
+    this.externalAuthId = null;
+    this.updatedAt = new Date();
+  }
+
+  assignUniversityId(universityId: UniversityId): void {
+    if (this.universityId) {
+      throw new Error("Person already assigned to a university");
+    }
+
+    this.universityId = universityId;
     this.updatedAt = new Date();
   }
 
@@ -536,7 +565,7 @@ export class Person {
     return this.personId;
   }
 
-  getExternalAuthId(): string | null {
+  getExternalAuthId(): ExternalAuthId | null {
     return this.externalAuthId;
   }
 

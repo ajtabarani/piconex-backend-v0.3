@@ -1,8 +1,14 @@
-import { Address, Person, PersonId, PersonRepository } from "../../..";
+import {
+  Address,
+  Person,
+  PersonId,
+  PersonRepository,
+  UniversityId,
+} from "../../..";
 
 export interface CreateImportedStudentRequest {
   personId: PersonId;
-  universityId: string;
+  universityId: UniversityId;
 
   firstName: string;
   preferredName: string | null;
