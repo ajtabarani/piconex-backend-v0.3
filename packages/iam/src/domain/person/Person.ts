@@ -21,6 +21,7 @@ export class Person {
     private readonly personId: PersonId,
     private externalAuthId: string | null,
     private universityId: string | null,
+    private isSuperAdmin: boolean,
 
     private firstName: string,
     private preferredName: string | null,
@@ -59,6 +60,7 @@ export class Person {
 
     this.roles = new Set(roles);
     this.state = state;
+    this.isSuperAdmin = isSuperAdmin;
   }
 
   // Factories
@@ -87,6 +89,7 @@ export class Person {
       personId,
       null,
       universityId,
+      false,
       firstName,
       preferredName,
       middleName,
@@ -139,6 +142,7 @@ export class Person {
       personId,
       externalAuthId,
       universityId,
+      false,
       firstName,
       preferredName,
       middleName,
@@ -190,6 +194,7 @@ export class Person {
       personId,
       null,
       universityId,
+      false,
       firstName,
       preferredName,
       middleName,
@@ -237,6 +242,7 @@ export class Person {
       personId,
       externalAuthId,
       universityId,
+      false,
       firstName,
       preferredName,
       middleName,
@@ -285,6 +291,7 @@ export class Person {
       personId,
       externalAuthId,
       universityId,
+      false,
       firstName,
       preferredName,
       middleName,
@@ -316,6 +323,7 @@ export class Person {
     personId: PersonId,
     externalAuthId: string | null,
     universityId: string | null,
+    isSuperAdmin: boolean,
 
     firstName: string,
     preferredName: string | null,
@@ -347,6 +355,7 @@ export class Person {
       personId,
       externalAuthId,
       universityId,
+      isSuperAdmin,
       firstName,
       preferredName,
       middleName,
@@ -508,6 +517,20 @@ export class Person {
     this.updatedAt = new Date();
   }
 
+  makeSuperAdmin(): void {
+    if (this.isSuperAdmin) return;
+
+    this.isSuperAdmin = true;
+    this.updatedAt = new Date();
+  }
+
+  revokeSuperAdmin(): void {
+    if (!this.isSuperAdmin) return;
+
+    this.isSuperAdmin = false;
+    this.updatedAt = new Date();
+  }
+
   // Read Interfaces
   getId(): PersonId {
     return this.personId;
@@ -523,6 +546,10 @@ export class Person {
 
   hasRole(role: Role): boolean {
     return this.roles.has(role);
+  }
+
+  isSystemSuperAdmin(): boolean {
+    return this.isSuperAdmin;
   }
 
   getStudentProfile(): StudentProfile {
