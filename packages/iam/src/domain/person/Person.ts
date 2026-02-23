@@ -384,6 +384,44 @@ export class Person {
   }
 
   // Commands
+  updateContactInformation(
+    phoneNumber: string | null,
+    address: Address | null,
+  ): void {
+    this.phoneNumber = phoneNumber;
+    this.address = address;
+    this.updatedAt = new Date();
+  }
+
+  updateDemographics(
+    pronouns: string | null,
+    sex: string | null,
+    gender: string | null,
+    birthday: Date | null,
+  ): void {
+    this.pronouns = pronouns;
+    this.sex = sex;
+    this.gender = gender;
+    this.birthday = birthday;
+    this.updatedAt = new Date();
+  }
+
+  updateEmail(email: string): void {
+    if (!email) throw new Error("Email cannot be empty");
+
+    this.email = email;
+    this.updatedAt = new Date();
+  }
+
+  updateUniversityId(universityId: UniversityId): void {
+    if (!this.universityId) {
+      throw new Error("Person has no university to update");
+    }
+
+    this.universityId = universityId;
+    this.updatedAt = new Date();
+  }
+
   deactivate(): void {
     this.state = PersonState.Inactive;
     this.updatedAt = new Date();
