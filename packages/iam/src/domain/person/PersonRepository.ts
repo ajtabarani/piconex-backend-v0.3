@@ -1,4 +1,4 @@
-import { ExternalAuthId, Person, PersonId } from "..";
+import { ExternalAuthId, Person, PersonId } from ".";
 
 export interface PersonRepository {
   load(id: PersonId): Promise<Person>;

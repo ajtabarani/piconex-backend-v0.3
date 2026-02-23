@@ -6,7 +6,6 @@ import {
   PersonId,
   PersonState,
   Role,
-  RoleState,
   StudentProfile,
   UniversityId,
 } from ".";

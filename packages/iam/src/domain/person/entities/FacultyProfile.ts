@@ -1,6 +1,6 @@
-import { RoleState } from "./RoleState";
+import { RoleState } from "..";
 
-export class AdminProfile {
+export class FacultyProfile {
   private state: RoleState;
   private stateChangedAt: Date;
 
@@ -8,9 +8,8 @@ export class AdminProfile {
   private updatedAt: Date;
 
   private constructor(
-    private jobTitle: string | null,
     private department: string | null,
-    private specialization: string | null,
+    private title: string | null,
     state: RoleState,
     stateChangedAt: Date,
     createdAt: Date,
@@ -23,16 +22,14 @@ export class AdminProfile {
   }
 
   static create(
-    jobTitle: string | null,
     department: string | null,
-    specialization: string | null,
-  ): AdminProfile {
+    title: string | null,
+  ): FacultyProfile {
     const now = new Date();
 
-    return new AdminProfile(
-      jobTitle,
+    return new FacultyProfile(
       department,
-      specialization,
+      title,
       RoleState.Active,
       now,
       now,
@@ -41,18 +38,16 @@ export class AdminProfile {
   }
 
   static restore(
-    jobTitle: string | null,
     department: string | null,
-    specialization: string | null,
+    title: string | null,
     state: RoleState,
     stateChangedAt: Date,
     createdAt: Date,
     updatedAt: Date,
-  ): AdminProfile {
-    return new AdminProfile(
-      jobTitle,
+  ): FacultyProfile {
+    return new FacultyProfile(
       department,
-      specialization,
+      title,
       state,
       stateChangedAt,
       createdAt,
@@ -60,14 +55,12 @@ export class AdminProfile {
     );
   }
 
-  updateJobInfo(
-    jobTitle: string | null,
+  updateProfessionalInfo(
     department: string | null,
-    specialization: string | null,
+    title: string | null,
   ): void {
-    this.jobTitle = jobTitle;
     this.department = department;
-    this.specialization = specialization;
+    this.title = title;
     this.updatedAt = new Date();
   }
 
@@ -93,16 +86,13 @@ export class AdminProfile {
     return this.state === RoleState.Active;
   }
 
-  getJobTitle(): string | null {
-    return this.jobTitle;
-  }
-
+  // 🔎 Read interfaces
   getDepartment(): string | null {
     return this.department;
   }
 
-  getSpecialization(): string | null {
-    return this.specialization;
+  getTitle(): string | null {
+    return this.title;
   }
 
   getStateChangedAt(): Date {

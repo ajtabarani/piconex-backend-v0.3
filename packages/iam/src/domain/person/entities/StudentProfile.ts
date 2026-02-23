@@ -1,4 +1,4 @@
-import { RoleState } from "./RoleState";
+import { RoleState } from "..";
 
 export class StudentProfile {
   private state: RoleState;
