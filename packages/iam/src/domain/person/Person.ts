@@ -9,6 +9,34 @@ import {
   StudentProfile,
   UniversityId,
 } from ".";
+import {
+  AdminProfileUpdated,
+  AdminRoleAssigned,
+  AdminRoleDeactivated,
+  AdminRoleReactivated,
+  ContactInformationUpdated,
+  DemographicsUpdated,
+  DomainEvent,
+  EmailUpdated,
+  ExternalAuthLinked,
+  ExternalAuthUnlinked,
+  FacultyProfileUpdated,
+  FacultyRoleAssigned,
+  FacultyRoleDeactivated,
+  FacultyRoleReactivated,
+  PersonActivated,
+  PersonCreated,
+  PersonDeactivated,
+  PersonImported,
+  StudentProfileUpdated,
+  StudentRoleAssigned,
+  StudentRoleDeactivated,
+  StudentRoleReactivated,
+  SuperAdminGranted,
+  SuperAdminRevoked,
+  UniversityAssigned,
+  UniversityUpdated,
+} from "..";
 
 export class Person {
   private roles: Set<Role>;
@@ -46,6 +74,8 @@ export class Person {
     private readonly createdAt: Date,
     private updatedAt: Date,
     private importJobId: string | null,
+
+    private domainEvents: DomainEvent[] = [],
   ) {
     if (roles.length === 0) {
       throw new Error("Person must have at least one role");
@@ -115,6 +145,9 @@ export class Person {
       yearOfStudy,
     );
 
+    person.addEvent(new PersonCreated(personId, [Role.Student], now));
+    person.addEvent(new PersonImported(personId, importJobId, now));
+
     return person;
   }
 
@@ -168,6 +201,9 @@ export class Person {
       yearOfStudy,
     );
 
+    person.addEvent(new PersonCreated(personId, [Role.Student], now));
+    person.addEvent(new ExternalAuthLinked(personId, externalAuthId, now));
+
     return person;
   }
 
@@ -216,6 +252,9 @@ export class Person {
 
     person.facultyProfile = FacultyProfile.create(department, title);
 
+    person.addEvent(new PersonCreated(personId, [Role.Faculty], now));
+    person.addEvent(new PersonImported(personId, importJobId, now));
+
     return person;
   }
 
@@ -263,6 +302,9 @@ export class Person {
     );
 
     person.facultyProfile = FacultyProfile.create(department, title);
+
+    person.addEvent(new PersonCreated(personId, [Role.Faculty], now));
+    person.addEvent(new ExternalAuthLinked(personId, externalAuthId, now));
 
     return person;
   }
@@ -316,6 +358,9 @@ export class Person {
       department,
       specialization,
     );
+
+    person.addEvent(new PersonCreated(personId, [Role.Admin], now));
+    person.addEvent(new ExternalAuthLinked(personId, externalAuthId, now));
 
     return person;
   }
@@ -390,6 +435,8 @@ export class Person {
     this.phoneNumber = phoneNumber;
     this.address = address;
     this.updatedAt = new Date();
+
+    this.addEvent(new ContactInformationUpdated(this.personId, new Date()));
   }
 
   updateDemographics(
@@ -403,6 +450,8 @@ export class Person {
     this.gender = gender;
     this.birthday = birthday;
     this.updatedAt = new Date();
+
+    this.addEvent(new DemographicsUpdated(this.personId, new Date()));
   }
 
   updateEmail(email: string): void {
@@ -410,6 +459,8 @@ export class Person {
 
     this.email = email;
     this.updatedAt = new Date();
+
+    this.addEvent(new EmailUpdated(this.personId, email, new Date()));
   }
 
   updateUniversityId(universityId: UniversityId): void {
@@ -419,16 +470,22 @@ export class Person {
 
     this.universityId = universityId;
     this.updatedAt = new Date();
+
+    this.addEvent(
+      new UniversityUpdated(this.personId, universityId, new Date()),
+    );
   }
 
   deactivate(): void {
     this.state = PersonState.Inactive;
     this.updatedAt = new Date();
+    this.addEvent(new PersonDeactivated(this.personId, new Date()));
   }
 
   activate(): void {
     this.state = PersonState.Active;
     this.updatedAt = new Date();
+    this.addEvent(new PersonActivated(this.personId, new Date()));
   }
 
   linkExternalAuth(externalAuthId: ExternalAuthId): void {
@@ -438,6 +495,9 @@ export class Person {
 
     this.externalAuthId = externalAuthId;
     this.updatedAt = new Date();
+    this.addEvent(
+      new ExternalAuthLinked(this.personId, externalAuthId, new Date()),
+    );
   }
 
   unlinkExternalAuth(): void {
@@ -447,6 +507,7 @@ export class Person {
 
     this.externalAuthId = null;
     this.updatedAt = new Date();
+    this.addEvent(new ExternalAuthUnlinked(this.personId, new Date()));
   }
 
   assignUniversityId(universityId: UniversityId): void {
@@ -456,6 +517,10 @@ export class Person {
 
     this.universityId = universityId;
     this.updatedAt = new Date();
+
+    this.addEvent(
+      new UniversityAssigned(this.personId, universityId, new Date()),
+    );
   }
 
   assignStudentRole(
@@ -475,18 +540,21 @@ export class Person {
 
     this.roles.add(Role.Student);
     this.updatedAt = new Date();
+    this.addEvent(new StudentRoleAssigned(this.personId, new Date()));
   }
 
   deactivateStudentRole(): void {
     if (!this.studentProfile) throw new Error("Not a student");
     this.studentProfile.deactivate();
     this.updatedAt = new Date();
+    this.addEvent(new StudentRoleDeactivated(this.personId, new Date()));
   }
 
   reactivateStudentRole(): void {
     if (!this.studentProfile) throw new Error("Not a student");
     this.studentProfile.activate();
     this.updatedAt = new Date();
+    this.addEvent(new StudentRoleReactivated(this.personId, new Date()));
   }
 
   updateStudentProfile(
@@ -505,6 +573,7 @@ export class Person {
     );
 
     this.updatedAt = new Date();
+    this.addEvent(new StudentProfileUpdated(this.personId, new Date()));
   }
 
   assignAdminRole(
@@ -524,18 +593,21 @@ export class Person {
 
     this.roles.add(Role.Admin);
     this.updatedAt = new Date();
+    this.addEvent(new AdminRoleAssigned(this.personId, new Date()));
   }
 
   deactivateAdminRole(): void {
     if (!this.adminProfile) throw new Error("Not a admin");
     this.adminProfile.deactivate();
     this.updatedAt = new Date();
+    this.addEvent(new AdminRoleDeactivated(this.personId, new Date()));
   }
 
   reactivateAdminRole(): void {
     if (!this.adminProfile) throw new Error("Not a admin");
     this.adminProfile.activate();
     this.updatedAt = new Date();
+    this.addEvent(new AdminRoleReactivated(this.personId, new Date()));
   }
 
   updateAdminProfile(
@@ -549,6 +621,7 @@ export class Person {
 
     this.adminProfile.updateJobInfo(jobTitle, department, specialization);
     this.updatedAt = new Date();
+    this.addEvent(new AdminProfileUpdated(this.personId, new Date()));
   }
 
   assignFacultyRole(department: string | null, title: string | null): void {
@@ -560,18 +633,21 @@ export class Person {
 
     this.roles.add(Role.Faculty);
     this.updatedAt = new Date();
+    this.addEvent(new FacultyRoleAssigned(this.personId, new Date()));
   }
 
   deactivateFacultyRole(): void {
     if (!this.facultyProfile) throw new Error("Not a faculty");
     this.facultyProfile.deactivate();
     this.updatedAt = new Date();
+    this.addEvent(new FacultyRoleDeactivated(this.personId, new Date()));
   }
 
   reactivateFacultyRole(): void {
     if (!this.facultyProfile) throw new Error("Not a faculty");
     this.facultyProfile.activate();
     this.updatedAt = new Date();
+    this.addEvent(new FacultyRoleReactivated(this.personId, new Date()));
   }
 
   updateFacultyProfile(department: string | null, title: string | null): void {
@@ -581,6 +657,7 @@ export class Person {
 
     this.facultyProfile.updateProfessionalInfo(department, title);
     this.updatedAt = new Date();
+    this.addEvent(new FacultyProfileUpdated(this.personId, new Date()));
   }
 
   makeSuperAdmin(): void {
@@ -588,6 +665,7 @@ export class Person {
 
     this.isSuperAdmin = true;
     this.updatedAt = new Date();
+    this.addEvent(new SuperAdminGranted(this.personId, new Date()));
   }
 
   revokeSuperAdmin(): void {
@@ -595,6 +673,7 @@ export class Person {
 
     this.isSuperAdmin = false;
     this.updatedAt = new Date();
+    this.addEvent(new SuperAdminRevoked(this.personId, new Date()));
   }
 
   // Read Interfaces
@@ -637,5 +716,16 @@ export class Person {
       throw new Error("Person is not faculty");
     }
     return this.facultyProfile;
+  }
+
+  // Domain Events
+  pullDomainEvents(): DomainEvent[] {
+    const events = this.domainEvents;
+    this.domainEvents = [];
+    return events;
+  }
+
+  private addEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
   }
 }
