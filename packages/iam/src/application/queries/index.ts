@@ -1,1 +1,1 @@
-export * from "./readModel/dto";
+export * from "./readModel";
