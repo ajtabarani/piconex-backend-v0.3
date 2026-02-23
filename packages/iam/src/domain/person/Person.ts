@@ -19,8 +19,7 @@ export class Person {
 
   private constructor(
     private readonly personId: PersonId,
-    private readonly externalAuthId: string | null,
-
+    private externalAuthId: string | null,
     private universityId: string | null,
 
     private firstName: string,
@@ -106,12 +105,10 @@ export class Person {
       importJobId,
     );
 
-    person.studentProfile = new StudentProfile(
+    person.studentProfile = StudentProfile.create(
       universityProgram,
       academicLevel,
       yearOfStudy,
-      RoleState.Active,
-      now,
     );
 
     return person;
@@ -160,12 +157,10 @@ export class Person {
       null,
     );
 
-    person.studentProfile = new StudentProfile(
+    person.studentProfile = StudentProfile.create(
       universityProgram,
       academicLevel,
       yearOfStudy,
-      RoleState.Active,
-      now,
     );
 
     return person;
@@ -213,12 +208,7 @@ export class Person {
       importJobId,
     );
 
-    person.facultyProfile = new FacultyProfile(
-      department,
-      title,
-      RoleState.Active,
-      now,
-    );
+    person.facultyProfile = FacultyProfile.create(department, title);
 
     return person;
   }
@@ -265,12 +255,7 @@ export class Person {
       null,
     );
 
-    person.facultyProfile = new FacultyProfile(
-      department,
-      title,
-      RoleState.Active,
-      now,
-    );
+    person.facultyProfile = FacultyProfile.create(department, title);
 
     return person;
   }
@@ -318,13 +303,71 @@ export class Person {
       null,
     );
 
-    person.adminProfile = new AdminProfile(
+    person.adminProfile = AdminProfile.create(
       jobTitle,
       department,
       specialization,
-      RoleState.Active,
-      now,
     );
+
+    return person;
+  }
+
+  static restore(
+    personId: PersonId,
+    externalAuthId: string | null,
+    universityId: string | null,
+
+    firstName: string,
+    preferredName: string | null,
+    middleName: string | null,
+    lastName: string,
+
+    email: string,
+    phoneNumber: string | null,
+
+    pronouns: string | null,
+    sex: string | null,
+    gender: string | null,
+
+    birthday: Date | null,
+    address: Address | null,
+
+    roles: Role[],
+    state: PersonState,
+
+    createdAt: Date,
+    updatedAt: Date,
+    importJobId: string | null,
+
+    studentProfile?: StudentProfile,
+    facultyProfile?: FacultyProfile,
+    adminProfile?: AdminProfile,
+  ): Person {
+    const person = new Person(
+      personId,
+      externalAuthId,
+      universityId,
+      firstName,
+      preferredName,
+      middleName,
+      lastName,
+      email,
+      phoneNumber,
+      pronouns,
+      sex,
+      gender,
+      birthday,
+      address,
+      roles,
+      state,
+      createdAt,
+      updatedAt,
+      importJobId,
+    );
+
+    person.studentProfile = studentProfile;
+    person.facultyProfile = facultyProfile;
+    person.adminProfile = adminProfile;
 
     return person;
   }
@@ -340,31 +383,129 @@ export class Person {
     this.updatedAt = new Date();
   }
 
-  assignStudentProfile(profile: StudentProfile): void {
+  assignStudentRole(
+    universityProgram: string | null,
+    academicLevel: string | null,
+    yearOfStudy: string | null,
+  ): void {
     if (this.studentProfile) {
       throw new Error("Student profile already exists");
     }
 
+    this.studentProfile = StudentProfile.create(
+      universityProgram,
+      academicLevel,
+      yearOfStudy,
+    );
+
     this.roles.add(Role.Student);
-    this.studentProfile = profile;
+    this.updatedAt = new Date();
   }
 
-  assignAdminProfile(profile: AdminProfile): void {
+  deactivateStudentRole(): void {
+    if (!this.studentProfile) throw new Error("Not a student");
+    this.studentProfile.deactivate();
+    this.updatedAt = new Date();
+  }
+
+  reactivateStudentRole(): void {
+    if (!this.studentProfile) throw new Error("Not a student");
+    this.studentProfile.activate();
+    this.updatedAt = new Date();
+  }
+
+  updateStudentProfile(
+    universityProgram: string | null,
+    academicLevel: string | null,
+    yearOfStudy: string | null,
+  ): void {
+    if (!this.studentProfile) {
+      throw new Error("Person is not a student");
+    }
+
+    this.studentProfile.updateAcademicInfo(
+      universityProgram,
+      academicLevel,
+      yearOfStudy,
+    );
+
+    this.updatedAt = new Date();
+  }
+
+  assignAdminRole(
+    jobTitle: string | null,
+    department: string | null,
+    specialization: string | null,
+  ): void {
     if (this.adminProfile) {
       throw new Error("Admin profile already exists");
     }
 
+    this.adminProfile = AdminProfile.create(
+      jobTitle,
+      department,
+      specialization,
+    );
+
     this.roles.add(Role.Admin);
-    this.adminProfile = profile;
+    this.updatedAt = new Date();
   }
 
-  assignFacultyProfile(profile: FacultyProfile): void {
+  deactivateAdminRole(): void {
+    if (!this.adminProfile) throw new Error("Not a admin");
+    this.adminProfile.deactivate();
+    this.updatedAt = new Date();
+  }
+
+  reactivateAdminRole(): void {
+    if (!this.adminProfile) throw new Error("Not a admin");
+    this.adminProfile.activate();
+    this.updatedAt = new Date();
+  }
+
+  updateAdminProfile(
+    jobTitle: string | null,
+    department: string | null,
+    specialization: string | null,
+  ): void {
+    if (!this.adminProfile) {
+      throw new Error("Person is not an admin");
+    }
+
+    this.adminProfile.updateJobInfo(jobTitle, department, specialization);
+    this.updatedAt = new Date();
+  }
+
+  assignFacultyRole(department: string | null, title: string | null): void {
     if (this.facultyProfile) {
       throw new Error("Faculty profile already exists");
     }
 
+    this.facultyProfile = FacultyProfile.create(department, title);
+
     this.roles.add(Role.Faculty);
-    this.facultyProfile = profile;
+    this.updatedAt = new Date();
+  }
+
+  deactivateFacultyRole(): void {
+    if (!this.facultyProfile) throw new Error("Not a faculty");
+    this.facultyProfile.deactivate();
+    this.updatedAt = new Date();
+  }
+
+  reactivateFacultyRole(): void {
+    if (!this.facultyProfile) throw new Error("Not a faculty");
+    this.facultyProfile.activate();
+    this.updatedAt = new Date();
+  }
+
+  updateFacultyProfile(department: string | null, title: string | null): void {
+    if (!this.facultyProfile) {
+      throw new Error("Person is not faculty");
+    }
+
+    this.facultyProfile.updateProfessionalInfo(department, title);
+    this.updatedAt = new Date();
   }
 
   // Read Interfaces

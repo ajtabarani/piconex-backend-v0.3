@@ -4,29 +4,89 @@ export class AdminProfile {
   private state: RoleState;
   private stateChangedAt: Date;
 
-  constructor(
+  private createdAt: Date;
+  private updatedAt: Date;
+
+  private constructor(
     private jobTitle: string | null,
     private department: string | null,
     private specialization: string | null,
     state: RoleState,
     stateChangedAt: Date,
+    createdAt: Date,
+    updatedAt: Date,
   ) {
     this.state = state;
     this.stateChangedAt = stateChangedAt;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
+
+  static create(
+    jobTitle: string | null,
+    department: string | null,
+    specialization: string | null,
+  ): AdminProfile {
+    const now = new Date();
+
+    return new AdminProfile(
+      jobTitle,
+      department,
+      specialization,
+      RoleState.Active,
+      now,
+      now,
+      now,
+    );
+  }
+
+  static restore(
+    jobTitle: string | null,
+    department: string | null,
+    specialization: string | null,
+    state: RoleState,
+    stateChangedAt: Date,
+    createdAt: Date,
+    updatedAt: Date,
+  ): AdminProfile {
+    return new AdminProfile(
+      jobTitle,
+      department,
+      specialization,
+      state,
+      stateChangedAt,
+      createdAt,
+      updatedAt,
+    );
+  }
+
+  updateJobInfo(
+    jobTitle: string | null,
+    department: string | null,
+    specialization: string | null,
+  ): void {
+    this.jobTitle = jobTitle;
+    this.department = department;
+    this.specialization = specialization;
+    this.updatedAt = new Date();
   }
 
   activate(): void {
     if (this.state === RoleState.Active) return;
 
+    const now = new Date();
     this.state = RoleState.Active;
-    this.stateChangedAt = new Date();
+    this.stateChangedAt = now;
+    this.updatedAt = now;
   }
 
   deactivate(): void {
     if (this.state === RoleState.Inactive) return;
 
+    const now = new Date();
     this.state = RoleState.Inactive;
-    this.stateChangedAt = new Date();
+    this.stateChangedAt = now;
+    this.updatedAt = now;
   }
 
   isActive(): boolean {

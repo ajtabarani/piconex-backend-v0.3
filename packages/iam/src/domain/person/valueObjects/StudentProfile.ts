@@ -4,29 +4,89 @@ export class StudentProfile {
   private state: RoleState;
   private stateChangedAt: Date;
 
-  constructor(
+  private createdAt: Date;
+  private updatedAt: Date;
+
+  private constructor(
     private universityProgram: string | null,
     private academicLevel: string | null,
     private yearOfStudy: string | null,
     state: RoleState,
     stateChangedAt: Date,
+    createdAt: Date,
+    updatedAt: Date,
   ) {
     this.state = state;
     this.stateChangedAt = stateChangedAt;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
+
+  static create(
+    universityProgram: string | null,
+    academicLevel: string | null,
+    yearOfStudy: string | null,
+  ): StudentProfile {
+    const now = new Date();
+
+    return new StudentProfile(
+      universityProgram,
+      academicLevel,
+      yearOfStudy,
+      RoleState.Active,
+      now,
+      now,
+      now,
+    );
+  }
+
+  static restore(
+    universityProgram: string | null,
+    academicLevel: string | null,
+    yearOfStudy: string | null,
+    state: RoleState,
+    stateChangedAt: Date,
+    createdAt: Date,
+    updatedAt: Date,
+  ): StudentProfile {
+    return new StudentProfile(
+      universityProgram,
+      academicLevel,
+      yearOfStudy,
+      state,
+      stateChangedAt,
+      createdAt,
+      updatedAt,
+    );
+  }
+
+  updateAcademicInfo(
+    universityProgram: string | null,
+    academicLevel: string | null,
+    yearOfStudy: string | null,
+  ): void {
+    this.universityProgram = universityProgram;
+    this.academicLevel = academicLevel;
+    this.yearOfStudy = yearOfStudy;
+    this.updatedAt = new Date();
   }
 
   activate(): void {
     if (this.state === RoleState.Active) return;
 
+    const now = new Date();
     this.state = RoleState.Active;
-    this.stateChangedAt = new Date();
+    this.stateChangedAt = now;
+    this.updatedAt = now;
   }
 
   deactivate(): void {
     if (this.state === RoleState.Inactive) return;
 
+    const now = new Date();
     this.state = RoleState.Inactive;
-    this.stateChangedAt = new Date();
+    this.stateChangedAt = now;
+    this.updatedAt = now;
   }
 
   isActive(): boolean {
