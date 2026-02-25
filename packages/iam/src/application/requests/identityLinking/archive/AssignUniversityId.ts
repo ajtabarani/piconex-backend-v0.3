@@ -1,5 +1,9 @@
-import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
-import { PersonId, UniversityId, PersonRepository } from "../../..";
+import {
+  PersonAuthorizationSnapshot,
+  PersonPolicy,
+  PolicyGuard,
+} from "../../..";
+import { PersonId, UniversityId, PersonRepository } from "../../../..";
 
 export interface AssignUniversityIdRequest {
   actor: PersonAuthorizationSnapshot;

@@ -1,4 +1,4 @@
-import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
+import { PersonAuthorizationSnapshot } from "../..";
 import { ExternalAuthId, PersonId, PersonRepository } from "../../..";
 
 export interface LinkExternalAuthAccountRequest {
@@ -8,15 +8,9 @@ export interface LinkExternalAuthAccountRequest {
 }
 
 export class LinkExternalAuthAccount {
-  constructor(
-    private readonly repository: PersonRepository,
-    private readonly policy: PersonPolicy,
-    private readonly guard: PolicyGuard,
-  ) {}
+  constructor(private readonly repository: PersonRepository) {}
 
   async execute(request: LinkExternalAuthAccountRequest): Promise<void> {
-    // Unfinished
-
     const existing = await this.repository.findByExternalAuthId(
       request.externalAuthId,
     );

@@ -1,4 +1,8 @@
-import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
+import {
+  PersonAuthorizationSnapshot,
+  PersonPolicy,
+  PolicyGuard,
+} from "../../..";
 import {
   Address,
   ExternalAuthId,
@@ -6,7 +10,7 @@ import {
   PersonId,
   PersonRepository,
   UniversityId,
-} from "../../..";
+} from "../../../..";
 
 export interface CreateStudentFromExternalAuthRequest {
   actor: PersonAuthorizationSnapshot;
