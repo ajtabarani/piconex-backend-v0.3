@@ -1,29 +1,25 @@
-import {
-  PersonAuthorizationSnapshot,
-  PersonPolicy,
-  PolicyGuard,
-} from "../../..";
-import { PersonId, UniversityId, PersonRepository } from "../../../..";
+import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
+import { PersonId, UniversityId, PersonRepository } from "../../..";
 
-export interface AssignUniversityIdRequest {
+export interface UpdateUniversityIdRequest {
   actor: PersonAuthorizationSnapshot;
   personId: PersonId;
   universityId: UniversityId;
 }
 
-export class AssignUniversityId {
+export class UpdateUniversityId {
   constructor(
     private readonly repository: PersonRepository,
     private readonly policy: PersonPolicy,
     private readonly guard: PolicyGuard,
   ) {}
 
-  async execute(request: AssignUniversityIdRequest): Promise<void> {
+  async execute(request: UpdateUniversityIdRequest): Promise<void> {
     // Unfinished
 
     const person = await this.repository.load(request.personId);
 
-    person.assignUniversityId(request.universityId);
+    person.updateUniversityId(request.universityId);
 
     await this.repository.save(person);
   }

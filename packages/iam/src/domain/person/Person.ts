@@ -49,7 +49,7 @@ export class Person {
   private constructor(
     private readonly personId: PersonId,
     private externalAuthId: ExternalAuthId | null,
-    private universityId: UniversityId | null,
+    private universityId: UniversityId,
     private isSuperAdmin: boolean,
 
     private firstName: string,
@@ -151,61 +151,61 @@ export class Person {
     return person;
   }
 
-  static createStudentFromExternalAuth(
-    personId: PersonId,
-    externalAuthId: ExternalAuthId,
-    universityId: UniversityId | null,
-    firstName: string,
-    preferredName: string | null,
-    middleName: string | null,
-    lastName: string,
-    email: string,
-    phoneNumber: string | null,
-    pronouns: string | null,
-    sex: string | null,
-    gender: string | null,
-    birthday: Date | null,
-    address: Address | null,
-    universityProgram: string | null,
-    academicLevel: string | null,
-    yearOfStudy: string | null,
-  ): Person {
-    const now = new Date();
+  // static createStudentFromExternalAuth(
+  //   personId: PersonId,
+  //   externalAuthId: ExternalAuthId,
+  //   universityId: UniversityId | null,
+  //   firstName: string,
+  //   preferredName: string | null,
+  //   middleName: string | null,
+  //   lastName: string,
+  //   email: string,
+  //   phoneNumber: string | null,
+  //   pronouns: string | null,
+  //   sex: string | null,
+  //   gender: string | null,
+  //   birthday: Date | null,
+  //   address: Address | null,
+  //   universityProgram: string | null,
+  //   academicLevel: string | null,
+  //   yearOfStudy: string | null,
+  // ): Person {
+  //   const now = new Date();
 
-    const person = new Person(
-      personId,
-      externalAuthId,
-      universityId,
-      false,
-      firstName,
-      preferredName,
-      middleName,
-      lastName,
-      email,
-      phoneNumber,
-      pronouns,
-      sex,
-      gender,
-      birthday,
-      address,
-      [Role.Student],
-      PersonState.Active,
-      now,
-      now,
-      null,
-    );
+  //   const person = new Person(
+  //     personId,
+  //     externalAuthId,
+  //     universityId,
+  //     false,
+  //     firstName,
+  //     preferredName,
+  //     middleName,
+  //     lastName,
+  //     email,
+  //     phoneNumber,
+  //     pronouns,
+  //     sex,
+  //     gender,
+  //     birthday,
+  //     address,
+  //     [Role.Student],
+  //     PersonState.Active,
+  //     now,
+  //     now,
+  //     null,
+  //   );
 
-    person.studentProfile = StudentProfile.create(
-      universityProgram,
-      academicLevel,
-      yearOfStudy,
-    );
+  //   person.studentProfile = StudentProfile.create(
+  //     universityProgram,
+  //     academicLevel,
+  //     yearOfStudy,
+  //   );
 
-    person.addEvent(new PersonCreated(personId, [Role.Student], now));
-    person.addEvent(new ExternalAuthLinked(personId, externalAuthId, now));
+  //   person.addEvent(new PersonCreated(personId, [Role.Student], now));
+  //   person.addEvent(new ExternalAuthLinked(personId, externalAuthId, now));
 
-    return person;
-  }
+  //   return person;
+  // }
 
   static createImportedFaculty(
     personId: PersonId,
@@ -258,61 +258,61 @@ export class Person {
     return person;
   }
 
-  static createFacultyFromExternalAuth(
-    personId: PersonId,
-    externalAuthId: ExternalAuthId,
-    universityId: UniversityId | null,
-    firstName: string,
-    preferredName: string | null,
-    middleName: string | null,
-    lastName: string,
-    email: string,
-    phoneNumber: string | null,
-    pronouns: string | null,
-    sex: string | null,
-    gender: string | null,
-    birthday: Date | null,
-    address: Address | null,
-    department: string | null,
-    title: string | null,
-  ): Person {
-    const now = new Date();
+  // static createFacultyFromExternalAuth(
+  //   personId: PersonId,
+  //   externalAuthId: ExternalAuthId,
+  //   universityId: UniversityId | null,
+  //   firstName: string,
+  //   preferredName: string | null,
+  //   middleName: string | null,
+  //   lastName: string,
+  //   email: string,
+  //   phoneNumber: string | null,
+  //   pronouns: string | null,
+  //   sex: string | null,
+  //   gender: string | null,
+  //   birthday: Date | null,
+  //   address: Address | null,
+  //   department: string | null,
+  //   title: string | null,
+  // ): Person {
+  //   const now = new Date();
 
-    const person = new Person(
-      personId,
-      externalAuthId,
-      universityId,
-      false,
-      firstName,
-      preferredName,
-      middleName,
-      lastName,
-      email,
-      phoneNumber,
-      pronouns,
-      sex,
-      gender,
-      birthday,
-      address,
-      [Role.Faculty],
-      PersonState.Active,
-      now,
-      now,
-      null,
-    );
+  //   const person = new Person(
+  //     personId,
+  //     externalAuthId,
+  //     universityId,
+  //     false,
+  //     firstName,
+  //     preferredName,
+  //     middleName,
+  //     lastName,
+  //     email,
+  //     phoneNumber,
+  //     pronouns,
+  //     sex,
+  //     gender,
+  //     birthday,
+  //     address,
+  //     [Role.Faculty],
+  //     PersonState.Active,
+  //     now,
+  //     now,
+  //     null,
+  //   );
 
-    person.facultyProfile = FacultyProfile.create(department, title);
+  //   person.facultyProfile = FacultyProfile.create(department, title);
 
-    person.addEvent(new PersonCreated(personId, [Role.Faculty], now));
-    person.addEvent(new ExternalAuthLinked(personId, externalAuthId, now));
+  //   person.addEvent(new PersonCreated(personId, [Role.Faculty], now));
+  //   person.addEvent(new ExternalAuthLinked(personId, externalAuthId, now));
 
-    return person;
-  }
+  //   return person;
+  // }
 
   static createAdmin(
     personId: PersonId,
     externalAuthId: ExternalAuthId,
-    universityId: UniversityId | null,
+    universityId: UniversityId,
     firstName: string,
     preferredName: string | null,
     middleName: string | null,
@@ -368,7 +368,7 @@ export class Person {
   static restore(
     personId: PersonId,
     externalAuthId: ExternalAuthId | null,
-    universityId: UniversityId | null,
+    universityId: UniversityId,
     isSuperAdmin: boolean,
 
     firstName: string,
@@ -508,19 +508,6 @@ export class Person {
     this.externalAuthId = null;
     this.updatedAt = new Date();
     this.addEvent(new ExternalAuthUnlinked(this.personId, new Date()));
-  }
-
-  assignUniversityId(universityId: UniversityId): void {
-    if (this.universityId) {
-      throw new Error("Person already assigned to a university");
-    }
-
-    this.universityId = universityId;
-    this.updatedAt = new Date();
-
-    this.addEvent(
-      new UniversityAssigned(this.personId, universityId, new Date()),
-    );
   }
 
   assignStudentRole(
