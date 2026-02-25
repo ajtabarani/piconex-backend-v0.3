@@ -1,13 +1,21 @@
+import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
 import { PersonId, PersonRepository, Role } from "../../..";
 
 export interface TransferSuperAdminOwnershipRequest {
+  actor: PersonAuthorizationSnapshot;
   newSuperAdminId: PersonId;
 }
 
 export class TransferSuperAdminOwnership {
-  constructor(private readonly repository: PersonRepository) {}
+  constructor(
+    private readonly repository: PersonRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: TransferSuperAdminOwnershipRequest): Promise<void> {
+    this.guard.ensure(this.policy.canManageSuperAdminDomain(request.actor));
+
     const currentSuperAdmin = await this.repository.loadSuperAdmin();
 
     const newSuperAdmin = await this.repository.load(request.newSuperAdminId);

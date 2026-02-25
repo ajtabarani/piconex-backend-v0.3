@@ -1,4 +1,4 @@
-import { Role } from "../../../..";
+import { PersonId, Role, UniversityId } from "../..";
 
 export type RoleAuthorizationSnapshot = {
   role: Role;
@@ -6,8 +6,8 @@ export type RoleAuthorizationSnapshot = {
 };
 
 export type PersonAuthorizationSnapshot = {
-  personId: string;
-  universityId: string | null;
+  personId: PersonId;
+  universityId: UniversityId | null;
 
   isActive: boolean;
   isSuperAdmin: boolean;

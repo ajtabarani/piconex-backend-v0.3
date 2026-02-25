@@ -1,6 +1,12 @@
+import {
+  PersonAuthorizationSnapshot,
+  PersonPolicy,
+  PolicyGuard,
+} from "../../..";
 import { PersonId, PersonRepository } from "../../../..";
 
 export interface AssignAdminRoleRequest {
+  actor: PersonAuthorizationSnapshot;
   personId: PersonId;
   jobTitle: string | null;
   department: string | null;
@@ -8,9 +14,15 @@ export interface AssignAdminRoleRequest {
 }
 
 export class AssignAdminRole {
-  constructor(private readonly repository: PersonRepository) {}
+  constructor(
+    private readonly repository: PersonRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: AssignAdminRoleRequest): Promise<void> {
+    this.guard.ensure(this.policy.canManageAdminDomain(request.actor));
+
     const person = await this.repository.load(request.personId);
 
     person.assignAdminRole(

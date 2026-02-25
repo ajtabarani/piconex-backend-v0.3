@@ -1,3 +1,4 @@
+import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
 import {
   Address,
   ExternalAuthId,
@@ -8,6 +9,8 @@ import {
 } from "../../..";
 
 export interface CreateAdminRequest {
+  actor: PersonAuthorizationSnapshot;
+
   personId: PersonId;
   externalAuthId: ExternalAuthId;
   universityId: UniversityId | null;
@@ -33,9 +36,15 @@ export interface CreateAdminRequest {
 }
 
 export class CreateAdmin {
-  constructor(private readonly repository: PersonRepository) {}
+  constructor(
+    private readonly repository: PersonRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: CreateAdminRequest): Promise<void> {
+    this.guard.ensure(this.policy.canManageAdminDomain(request.actor));
+
     const existing = await this.repository.findByExternalAuthId(
       request.externalAuthId,
     );

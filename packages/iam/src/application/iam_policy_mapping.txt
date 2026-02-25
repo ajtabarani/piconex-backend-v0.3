@@ -1,0 +1,64 @@
+IAM POLICY MAPPING
+
+CAPABILITIES
+canManageOwnIdentity
+canManageStudentDomain
+canManageFacultyDomain
+canManageAdminDomain
+canManageSuperAdminDomain
+
+PROVISIONING / CREATION
+CreateStudentFromExternalAuth -> NO POLICY (self
+provisioning)
+CreateFacultyFromExternalAuth -> NO POLICY (self
+provisioning)
+CreateAdmin -> canManageAdminDomain
+
+EXTERNAL AUTH LINKING
+LinkExternalAuthAccount -> canManageOwnIdentity
+UnlinkExternalAuthAccount -> canManageOwnIdentity
+
+ROLE ASSIGNMENT & MANAGEMENT
+AssignStudentRole -> canManageStudentDomain
+AssignFacultyRole -> canManageFacultyDomain
+AssignAdminRole -> canManageAdminDomain
+
+DeactivateStudentRole -> canManageStudentDomain
+ReactivateStudentRole -> canManageStudentDomain
+
+DeactivateFacultyRole -> canManageFacultyDomain
+ReactivateFacultyRole -> canManageFacultyDomain
+
+DeactivateAdminRole -> canManageAdminDomain
+ReactivateAdminRole -> canManageAdminDomain
+
+PERSON LIFECYCLE
+ActivatePerson -> canManagePersonHierarchy
+DeactivatePerson -> canManagePersonHierarchy
+
+IDENTITY UPDATES
+UpdateContactInformation -> canManageOwnIdentity
+UpdateDemographics -> canManageOwnIdentity
+UpdateEmail -> canManageOwnIdentity
+
+AssignUniversityId -> canManageSuperAdminDomain
+UpdateUniversityId -> canManageSuperAdminDomain
+
+PROFILE UPDATES
+UpdateStudentProfile -> canManageStudentDomain
+UpdateFacultyProfile -> canManageFacultyDomain
+UpdateAdminProfile -> canManageAdminDomain
+
+SUPER ADMIN AUTHORITY
+TransferSuperAdminOwnership -> canManageSuperAdminDomain
+
+QUERIES
+GetPersonById -> canManageOwnIdentity OR canManageAdminDomain
+GetPersonByExternalAuthId -> canManageAdminDomain
+GetPersonAuthorizationSnapshot -> canManageAdminDomain
+CheckPersonHasRole -> canManageOwnIdentity
+CheckPersonIsActive -> canManageOwnIdentity
+GetStudentProfile -> canManageStudentDomain
+GetFacultyProfile -> canManageFacultyDomain
+GetAdminProfile -> canManageAdminDomain
+GetSuperAdmin -> canManageSuperAdminDomain

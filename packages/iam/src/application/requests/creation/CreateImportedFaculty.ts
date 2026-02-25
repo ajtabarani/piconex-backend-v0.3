@@ -1,3 +1,4 @@
+import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
 import {
   PersonId,
   Address,
@@ -7,6 +8,8 @@ import {
 } from "../../..";
 
 export interface CreateImportedFacultyRequest {
+  actor: PersonAuthorizationSnapshot;
+
   personId: PersonId;
   universityId: UniversityId;
 
@@ -32,9 +35,15 @@ export interface CreateImportedFacultyRequest {
 }
 
 export class CreateImportedFaculty {
-  constructor(private readonly repository: PersonRepository) {}
+  constructor(
+    private readonly repository: PersonRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: CreateImportedFacultyRequest): Promise<void> {
+    this.guard.ensure(this.policy.canManageFacultyDomain(request.actor));
+
     const person = Person.createImportedFaculty(
       request.personId,
       request.universityId,

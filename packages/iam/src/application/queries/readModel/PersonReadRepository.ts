@@ -1,10 +1,10 @@
 import {
   AdminProfileDTO,
   FacultyProfileDTO,
-  PersonAuthorizationSnapshot,
   PersonDTO,
   StudentProfileDTO,
 } from "..";
+import { PersonAuthorizationSnapshot } from "../..";
 import { ExternalAuthId, PersonId } from "../../..";
 
 export interface PersonReadRepository {

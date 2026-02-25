@@ -1,3 +1,4 @@
+import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
 import {
   Address,
   ExternalAuthId,
@@ -8,6 +9,8 @@ import {
 } from "../../..";
 
 export interface CreateFacultyFromExternalAuthRequest {
+  actor: PersonAuthorizationSnapshot;
+
   personId: PersonId;
   externalAuthId: ExternalAuthId;
   universityId: UniversityId | null;
@@ -32,9 +35,15 @@ export interface CreateFacultyFromExternalAuthRequest {
 }
 
 export class CreateFacultyFromExternalAuth {
-  constructor(private readonly repository: PersonRepository) {}
+  constructor(
+    private readonly repository: PersonRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: CreateFacultyFromExternalAuthRequest): Promise<void> {
+    // Unfinished
+
     const existing = await this.repository.findByExternalAuthId(
       request.externalAuthId,
     );

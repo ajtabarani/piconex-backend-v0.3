@@ -1,14 +1,22 @@
+import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
 import { ExternalAuthId, PersonId, PersonRepository } from "../../..";
 
 export interface LinkExternalAuthAccountRequest {
+  actor: PersonAuthorizationSnapshot;
   personId: PersonId;
   externalAuthId: ExternalAuthId;
 }
 
 export class LinkExternalAuthAccount {
-  constructor(private readonly repository: PersonRepository) {}
+  constructor(
+    private readonly repository: PersonRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: LinkExternalAuthAccountRequest): Promise<void> {
+    // Unfinished
+
     const existing = await this.repository.findByExternalAuthId(
       request.externalAuthId,
     );

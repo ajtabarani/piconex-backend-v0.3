@@ -1,6 +1,12 @@
+import {
+  PersonAuthorizationSnapshot,
+  PersonPolicy,
+  PolicyGuard,
+} from "../../..";
 import { PersonId, PersonRepository } from "../../../..";
 
 export interface UpdateStudentProfileRequest {
+  actor: PersonAuthorizationSnapshot;
   personId: PersonId;
   universityProgram: string | null;
   academicLevel: string | null;
@@ -8,9 +14,15 @@ export interface UpdateStudentProfileRequest {
 }
 
 export class UpdateStudentProfile {
-  constructor(private readonly repository: PersonRepository) {}
+  constructor(
+    private readonly repository: PersonRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: UpdateStudentProfileRequest): Promise<void> {
+    this.guard.ensure(this.policy.canManageStudentDomain(request.actor));
+
     const person = await this.repository.load(request.personId);
 
     person.updateStudentProfile(
