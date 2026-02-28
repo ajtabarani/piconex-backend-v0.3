@@ -1,22 +1,35 @@
-import { PersonId, Role } from "../../..";
+import {
+  PersonAuthorizationSnapshot,
+  PersonId,
+  PersonPolicy,
+  PolicyGuard,
+  Role,
+} from "../../..";
 import { PersonReadRepository } from "..";
 
 export interface CheckPersonHasRoleRequest {
+  actor: PersonAuthorizationSnapshot;
   personId: PersonId;
   role: Role;
 }
 
 export class CheckPersonHasRole {
-  constructor(private readonly repository: PersonReadRepository) {}
+  constructor(
+    private readonly repository: PersonReadRepository,
+    private readonly policy: PersonPolicy,
+    private readonly guard: PolicyGuard,
+  ) {}
 
   async execute(request: CheckPersonHasRoleRequest): Promise<boolean> {
-    const snapshot = await this.repository.findAuthorizationSnapshot(
+    const target = await this.repository.findAuthorizationSnapshot(
       request.personId,
     );
 
-    if (!snapshot) return false;
+    if (!target) return false;
 
-    return snapshot.roles.some(
+    this.guard.ensure(this.policy.canViewPerson(request.actor, target));
+
+    return target.roles.some(
       (r) => r.role === request.role && r.active === true,
     );
   }
