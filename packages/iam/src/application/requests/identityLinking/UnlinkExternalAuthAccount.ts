@@ -1,25 +1,24 @@
 import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
-import { PersonId, UniversityId, PersonRepository } from "../../..";
+import { PersonId, PersonRepository } from "../../..";
 
-export interface UpdateUniversityIdRequest {
+export interface UnlinkExternalAuthAccountRequest {
   actor: PersonAuthorizationSnapshot;
   personId: PersonId;
-  universityId: UniversityId;
 }
 
-export class UpdateUniversityId {
+export class UnlinkExternalAuthAccount {
   constructor(
     private readonly repository: PersonRepository,
     private readonly policy: PersonPolicy,
     private readonly guard: PolicyGuard,
   ) {}
 
-  async execute(request: UpdateUniversityIdRequest): Promise<void> {
-    // Unfinished
+  async execute(request: UnlinkExternalAuthAccountRequest): Promise<void> {
+    this.guard.ensure(this.policy.canManageStudentDomain(request.actor));
 
     const person = await this.repository.load(request.personId);
 
-    person.updateUniversityId(request.universityId);
+    person.unlinkExternalAuth();
 
     await this.repository.save(person);
   }

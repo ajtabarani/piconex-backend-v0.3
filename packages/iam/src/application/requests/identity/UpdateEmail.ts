@@ -15,9 +15,7 @@ export class UpdateEmail {
   ) {}
 
   async execute(request: UpdateEmailRequest): Promise<void> {
-    this.guard.ensure(
-      this.policy.canManageOwnIdentity(request.actor, request.personId),
-    );
+    this.guard.ensure(this.policy.canManageStudentDomain(request.actor));
 
     const person = await this.repository.load(request.personId);
 
