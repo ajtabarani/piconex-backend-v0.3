@@ -13,7 +13,7 @@ export interface CreateAdminRequest {
 
   personId: PersonId;
   externalAuthId: ExternalAuthId;
-  universityId: UniversityId | null;
+  universityId: UniversityId;
 
   firstName: string;
   preferredName: string | null;
@@ -43,7 +43,7 @@ export class CreateAdmin {
   ) {}
 
   async execute(request: CreateAdminRequest): Promise<void> {
-    this.guard.ensure(this.policy.canManageAdminDomain(request.actor));
+    this.guard.ensure(this.policy.isSuperAdmin(request.actor));
 
     const existing = await this.repository.findByExternalAuthId(
       request.externalAuthId,

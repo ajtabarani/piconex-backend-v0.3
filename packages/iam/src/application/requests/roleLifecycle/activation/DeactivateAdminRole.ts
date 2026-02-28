@@ -18,7 +18,7 @@ export class DeactivateAdminRole {
   ) {}
 
   async execute(request: DeactivateAdminRoleRequest): Promise<void> {
-    this.guard.ensure(this.policy.canManageAdminDomain(request.actor));
+    this.guard.ensure(this.policy.isSuperAdmin(request.actor));
 
     const person = await this.repository.load(request.personId);
 

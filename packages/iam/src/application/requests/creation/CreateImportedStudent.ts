@@ -43,7 +43,7 @@ export class CreateImportedStudent {
   ) {}
 
   async execute(request: CreateImportedStudentRequest): Promise<void> {
-    this.guard.ensure(this.policy.canManageStudentDomain(request.actor));
+    this.guard.ensure(this.policy.hasAdministrativeAuthority(request.actor));
 
     const person = Person.createImportedStudent(
       request.personId,

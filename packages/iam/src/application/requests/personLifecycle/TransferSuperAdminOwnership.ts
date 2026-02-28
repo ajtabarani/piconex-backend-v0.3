@@ -14,7 +14,7 @@ export class TransferSuperAdminOwnership {
   ) {}
 
   async execute(request: TransferSuperAdminOwnershipRequest): Promise<void> {
-    this.guard.ensure(this.policy.canManageSuperAdminDomain(request.actor));
+    this.guard.ensure(this.policy.isSuperAdmin(request.actor));
 
     const currentSuperAdmin = await this.repository.loadSuperAdmin();
 

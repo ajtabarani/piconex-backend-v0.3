@@ -18,7 +18,7 @@ export class ReactivateStudentRole {
   ) {}
 
   async execute(request: ReactivateStudentRoleRequest): Promise<void> {
-    this.guard.ensure(this.policy.canManageStudentDomain(request.actor));
+    this.guard.ensure(this.policy.hasAdministrativeAuthority(request.actor));
 
     const person = await this.repository.load(request.personId);
 

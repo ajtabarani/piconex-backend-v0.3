@@ -25,9 +25,7 @@ export class DeactivatePerson {
     );
     if (!target) throw new Error("Person not found");
 
-    this.guard.ensure(
-      this.policy.canManagePersonHierarchy(request.actor, target),
-    );
+    this.guard.ensure(this.policy.canManagePerson(request.actor, target));
 
     const person = await this.repository.load(request.personId);
 

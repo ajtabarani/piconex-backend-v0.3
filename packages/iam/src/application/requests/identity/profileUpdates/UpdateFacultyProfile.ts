@@ -20,7 +20,7 @@ export class UpdateFacultyProfile {
   ) {}
 
   async execute(request: UpdateFacultyProfileRequest): Promise<void> {
-    this.guard.ensure(this.policy.canManageFacultyDomain(request.actor));
+    this.guard.ensure(this.policy.hasAdministrativeAuthority(request.actor));
 
     const person = await this.repository.load(request.personId);
 

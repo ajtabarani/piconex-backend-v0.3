@@ -2,27 +2,45 @@ import { PersonAuthorizationSnapshot } from "..";
 import { PersonId, Role } from "../..";
 
 export class PersonPolicy {
-  canManageOwnIdentity(actor: PersonAuthorizationSnapshot, targetId: PersonId) {
-    return actor.personId.equals(targetId) || actor.isSuperAdmin;
+  // ===== Authority Checks =====
+
+  isSelf(actor: PersonAuthorizationSnapshot, targetId: PersonId): boolean {
+    return actor.personId.equals(targetId);
   }
 
-  canManageStudentDomain(actor: PersonAuthorizationSnapshot) {
-    return actor.isSuperAdmin || this.hasActiveRole(actor, Role.Admin);
+  isAdmin(actor: PersonAuthorizationSnapshot): boolean {
+    return this.hasActiveRole(actor, Role.Admin);
   }
 
-  canManageFacultyDomain(actor: PersonAuthorizationSnapshot) {
-    return actor.isSuperAdmin || this.hasActiveRole(actor, Role.Admin);
-  }
-
-  canManageAdminDomain(actor: PersonAuthorizationSnapshot) {
+  isSuperAdmin(actor: PersonAuthorizationSnapshot): boolean {
     return actor.isSuperAdmin;
   }
 
-  canManageSuperAdminDomain(actor: PersonAuthorizationSnapshot) {
-    return actor.isSuperAdmin;
+  // ===== Core IAM Permission =====
+
+  /**
+   * Is actor admin or above?
+   */
+  hasAdministrativeAuthority(actor: PersonAuthorizationSnapshot): boolean {
+    return this.isSuperAdmin(actor) || this.isAdmin(actor);
   }
 
-  canManagePersonHierarchy(
+  /**
+   * Can they manage their own information?
+   */
+  canManageOwnIdentity(
+    actor: PersonAuthorizationSnapshot,
+    targetId: PersonId,
+  ): boolean {
+    return this.isSelf(actor, targetId) || this.isSuperAdmin(actor);
+  }
+
+  /**
+   * Can actor manage (modify/activate/deactivate) the target?
+   * Enforces strict hierarchy:
+   * SuperAdmin > Admin > Everyone else
+   */
+  canManagePerson(
     actor: PersonAuthorizationSnapshot,
     target: PersonAuthorizationSnapshot,
   ): boolean {
@@ -32,6 +50,20 @@ export class PersonPolicy {
     return actorRank > targetRank;
   }
 
+  /**
+   * Can actor view the target?
+   * - Self always allowed
+   * - Otherwise follow hierarchy
+   */
+  canViewPerson(
+    actor: PersonAuthorizationSnapshot,
+    target: PersonAuthorizationSnapshot,
+  ): boolean {
+    if (this.isSelf(actor, target.personId)) return true;
+
+    return this.canManagePerson(actor, target);
+  }
+
   private hasActiveRole(actor: PersonAuthorizationSnapshot, role: Role) {
     return actor.roles.some((r) => r.role === role && r.active);
   }
@@ -39,12 +71,14 @@ export class PersonPolicy {
   private getHighestRank(snapshot: PersonAuthorizationSnapshot): number {
     if (snapshot.isSuperAdmin) return 3;
 
-    if (snapshot.roles.some((r) => r.role === Role.Admin && r.active)) return 2;
+    if (this.hasActiveRole(snapshot, Role.Admin)) return 2;
 
-    if (snapshot.roles.some((r) => r.role === Role.Student && r.active))
+    if (
+      this.hasActiveRole(snapshot, Role.Student) ||
+      this.hasActiveRole(snapshot, Role.Faculty)
+    ) {
       return 1;
-    if (snapshot.roles.some((r) => r.role === Role.Faculty && r.active))
-      return 1;
+    }
 
     return 0;
   }
