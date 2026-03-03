@@ -1,4 +1,4 @@
-import { Role } from "../../../..";
+import { Role } from "../../../../domain";
 
 export type PersonDTO = {
   personId: string;

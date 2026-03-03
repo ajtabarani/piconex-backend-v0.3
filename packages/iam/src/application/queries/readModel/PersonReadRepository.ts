@@ -4,8 +4,8 @@ import {
   PersonDTO,
   StudentProfileDTO,
 } from "..";
-import { PersonAuthorizationSnapshot } from "../..";
-import { ExternalAuthId, PersonId } from "../../..";
+import { PersonId, ExternalAuthId } from "../../../domain";
+import { PersonAuthorizationSnapshot } from "../../policies";
 
 export interface PersonReadRepository {
   findById(personId: PersonId): Promise<PersonDTO | null>;

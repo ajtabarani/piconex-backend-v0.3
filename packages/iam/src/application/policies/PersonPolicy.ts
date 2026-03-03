@@ -1,5 +1,5 @@
-import { PersonAuthorizationSnapshot } from "..";
-import { PersonId, Role } from "../..";
+import { PersonAuthorizationSnapshot } from ".";
+import { PersonId, Role } from "../../domain";
 
 export class PersonPolicy {
   // ===== Authority Checks =====

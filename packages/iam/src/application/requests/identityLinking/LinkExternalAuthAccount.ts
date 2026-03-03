@@ -1,5 +1,5 @@
-import { PersonAuthorizationSnapshot } from "../..";
-import { ExternalAuthId, PersonId, PersonRepository } from "../../..";
+import { PersonId, ExternalAuthId, PersonRepository } from "../../../domain";
+import { PersonAuthorizationSnapshot } from "../../policies";
 
 export interface LinkExternalAuthAccountRequest {
   actor: PersonAuthorizationSnapshot;

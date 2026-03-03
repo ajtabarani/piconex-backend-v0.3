@@ -1,9 +1,9 @@
+import { PersonId, PersonRepository } from "../../../../domain";
 import {
   PersonAuthorizationSnapshot,
   PersonPolicy,
   PolicyGuard,
-} from "../../..";
-import { PersonId, PersonRepository } from "../../../..";
+} from "../../../policies";
 
 export interface DeactivateAdminRoleRequest {
   actor: PersonAuthorizationSnapshot;

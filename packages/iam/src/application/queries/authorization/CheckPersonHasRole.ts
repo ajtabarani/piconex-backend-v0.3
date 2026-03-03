@@ -1,11 +1,10 @@
+import { PersonId, Role } from "../../../domain";
 import {
   PersonAuthorizationSnapshot,
-  PersonId,
   PersonPolicy,
   PolicyGuard,
-  Role,
-} from "../../..";
-import { PersonReadRepository } from "..";
+} from "../../policies";
+import { PersonReadRepository } from "../readModel";
 
 export interface CheckPersonHasRoleRequest {
   actor: PersonAuthorizationSnapshot;

@@ -1,5 +1,9 @@
-import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
-import { PersonId, PersonRepository } from "../../..";
+import { PersonId, PersonRepository } from "../../../domain";
+import {
+  PersonAuthorizationSnapshot,
+  PersonPolicy,
+  PolicyGuard,
+} from "../../policies";
 
 export interface UpdateDemographicsRequest {
   actor: PersonAuthorizationSnapshot;

@@ -1,4 +1,4 @@
-import { PersonId, Role, UniversityId } from "../..";
+import { Role, PersonId, UniversityId } from "../../domain";
 
 export type RoleAuthorizationSnapshot = {
   role: Role;

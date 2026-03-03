@@ -1,10 +1,10 @@
+import { PersonId } from "../../../domain";
 import {
   PersonAuthorizationSnapshot,
-  PersonId,
   PersonPolicy,
   PolicyGuard,
-} from "../../..";
-import { FacultyProfileDTO, PersonReadRepository } from "..";
+} from "../../policies";
+import { PersonReadRepository, FacultyProfileDTO } from "../readModel";
 
 export interface GetFacultyProfileRequest {
   actor: PersonAuthorizationSnapshot;

@@ -1,5 +1,9 @@
-import { PersonAuthorizationSnapshot, PersonPolicy, PolicyGuard } from "../..";
-import { PersonId, PersonRepository, Role } from "../../..";
+import { PersonId, PersonRepository, Role } from "../../../domain";
+import {
+  PersonAuthorizationSnapshot,
+  PersonPolicy,
+  PolicyGuard,
+} from "../../policies";
 
 export interface TransferSuperAdminOwnershipRequest {
   actor: PersonAuthorizationSnapshot;

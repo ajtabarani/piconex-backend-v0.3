@@ -1,10 +1,10 @@
+import { ExternalAuthId } from "../../../domain";
 import {
   PersonAuthorizationSnapshot,
   PersonPolicy,
   PolicyGuard,
-} from "../../..";
-import { ExternalAuthId } from "../../..";
-import { PersonDTO, PersonReadRepository } from "..";
+} from "../../policies";
+import { PersonReadRepository, PersonDTO } from "../readModel";
 
 export interface GetPersonByExternalAuthIdRequest {
   actor: PersonAuthorizationSnapshot;
