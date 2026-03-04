@@ -27,7 +27,7 @@ export default class Meeting {
   private meetingTime: Date;
   private durationMinutes: DurationMinutes;
   private location: MeetingLocation;
-  private attendees: MeetingAttendee[];
+  private attendees: MeetingAttendee[] = [];
 
   private state: MeetingState;
 

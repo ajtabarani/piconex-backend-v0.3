@@ -18,9 +18,9 @@ import { DocumentationRequestState } from "./valueObjects/DocumentationRequestSt
 export default class DocumentationRequest {
   private readonly documentationRequestId: DocumentationRequestId;
   private readonly caseId: CaseId;
-  private waitingDocumentationIds: DocumentationId[];
-  private acceptedDocumentationIds: DocumentationId[];
-  private rejectedDocumentationIds: DocumentationId[];
+  private waitingDocumentationIds: DocumentationId[] = [];
+  private acceptedDocumentationIds: DocumentationId[] = [];
+  private rejectedDocumentationIds: DocumentationId[] = [];
 
   private state: DocumentationRequestState;
 

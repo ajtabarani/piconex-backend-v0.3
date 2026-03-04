@@ -17,8 +17,8 @@ import { MessageThreadParticipant, ParticipantRole } from "./valueObjects";
 export default class MessageThread {
   private readonly threadId: MessageThreadId;
   private readonly caseId?: CaseId;
-  private participants: MessageThreadParticipant[];
-  private messages: Message[];
+  private participants: MessageThreadParticipant[] = [];
+  private messages: Message[] = [];
 
   private readonly createdAt: Date;
   private readonly createdBy: PersonId;
