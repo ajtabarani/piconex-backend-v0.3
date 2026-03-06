@@ -1,4 +1,4 @@
-import { DocumentationRequestId } from "../..";
+import { DocumentationRequestId } from "../shared";
 import DocumentationRequest from "./DocumentationRequest";
 
 export interface DocumentationRequestRepository {

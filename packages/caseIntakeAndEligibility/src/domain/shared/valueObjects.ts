@@ -23,3 +23,33 @@ export class CaseId extends StringValueObject {
     return new CaseId(value);
   }
 }
+
+export class PersonId extends StringValueObject {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value: string): PersonId {
+    return new PersonId(value);
+  }
+}
+
+export class CaseNoteId extends StringValueObject {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value: string): CaseNoteId {
+    return new CaseNoteId(value);
+  }
+}
+
+export class StudentDisabilityId extends StringValueObject {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value: string): StudentDisabilityId {
+    return new StudentDisabilityId(value);
+  }
+}

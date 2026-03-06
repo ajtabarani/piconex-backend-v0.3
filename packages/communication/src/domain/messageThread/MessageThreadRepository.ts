@@ -1,4 +1,4 @@
-import { MessageThreadId } from "../..";
+import { MessageThreadId } from "../shared";
 import MessageThread from "./MessageThread";
 
 export interface MessageThreadRepository {

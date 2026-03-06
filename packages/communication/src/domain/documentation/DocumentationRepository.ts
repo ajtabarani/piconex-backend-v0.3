@@ -1,4 +1,4 @@
-import { DocumentationId } from "../..";
+import { DocumentationId } from "../shared";
 import Documentation from "./Documentation";
 
 export interface DocumentationRepository {
