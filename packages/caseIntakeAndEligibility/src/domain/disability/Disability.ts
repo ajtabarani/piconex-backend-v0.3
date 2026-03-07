@@ -36,6 +36,8 @@ export default class Disability {
 
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy;
+
+        this.assertInvariants();
     }
 
     // Factories
