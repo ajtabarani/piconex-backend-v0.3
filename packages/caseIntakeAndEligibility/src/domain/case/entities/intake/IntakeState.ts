@@ -4,4 +4,5 @@ export enum IntakeState {
   Approved = "APPROVED",
   Denied = "DENIED",
   Withdrawn = "WITHDRAWN",
+  Abandoned = "ABANDONED",
 }

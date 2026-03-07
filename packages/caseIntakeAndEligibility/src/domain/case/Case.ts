@@ -2,7 +2,8 @@ import {
   CaseId,
   PersonId,
   StudentDisabilityId,
-  CaseOpened,
+  CaseOpenedByAdmin,
+  CaseOpenedByStudentIntake,
   CaseClosed,
   CaseReopened,
   IntakeSubmitted,
@@ -14,21 +15,23 @@ import {
   IntakeUnderReview,
   CaseUnderReview,
   CaseApprovedForAccommodations,
+  CaseCancelled,
   CaseNoteAdded,
   CaseAssignmentAdded,
   CaseAssignmentRemoved,
+  CasePrimaryAdminTransferred,
   CaseDisabilityAdded,
   CasePrimaryDisabilitySet,
   DomainEvent,
 } from "../shared";
 
-import { CaseNote, Intake } from "./entities";
+import { CaseNote, Intake, IntakeState } from "./entities";
 import {
-  CaseState,
   ClosedStatus,
   CaseDisability,
   CaseAssignment,
   CaseAssignmentRole,
+  CaseState,
 } from "./valueObjects";
 
 export default class Case {
@@ -126,7 +129,7 @@ export default class Case {
       actorId,
     );
 
-    caseEntity.domainEvents.push(new CaseOpened(caseId, actorId, now));
+    caseEntity.domainEvents.push(new CaseOpenedByAdmin(caseId, actorId, now));
     caseEntity.domainEvents.push(
       new CaseAssignmentAdded(caseId, actorId, CaseAssignmentRole.Primary, now),
     );
@@ -157,8 +160,11 @@ export default class Case {
       actorId,
     );
 
-    caseEntity.domainEvents.push(new CaseOpened(caseId, actorId, now));
     caseEntity.domainEvents.push(new IntakeSubmitted(caseId, actorId, now));
+
+    caseEntity.domainEvents.push(
+      new CaseOpenedByStudentIntake(caseId, actorId, now),
+    );
 
     return caseEntity;
   }
@@ -207,21 +213,21 @@ export default class Case {
       throw new Error("Intake can only be submitted from admin created state");
     }
 
+    const now = new Date();
+
     this.intake = Intake.createNew();
+    this.intake.moveToUnderReview();
+
     this.state = CaseState.IntakeUnderReview;
-    this.stateChangedAt = new Date();
+    this.stateChangedAt = now;
 
-    this.domainEvents.push(
-      new IntakeSubmitted(this.caseId, actorId, new Date()),
-    );
+    this.domainEvents.push(new IntakeSubmitted(this.caseId, actorId, now));
 
-    this.domainEvents.push(
-      new IntakeUnderReview(this.caseId, actorId, new Date()),
-    );
+    this.domainEvents.push(new IntakeUnderReview(this.caseId, actorId, now));
 
-    this.domainEvents.push(
-      new CaseUnderReview(this.caseId, actorId, new Date()),
-    );
+    this.domainEvents.push(new CaseUnderReview(this.caseId, actorId, now));
+
+    this.assertInvariants();
   }
 
   skipIntake(actorId: PersonId): void {
@@ -229,13 +235,17 @@ export default class Case {
       throw new Error("Can only skip intake from admin created state");
     }
 
-    this.state = CaseState.ApprovedForAccommodations;
-    this.stateChangedAt = new Date();
+    const now = new Date();
 
-    this.domainEvents.push(new IntakeSkipped(this.caseId, actorId, new Date()));
+    this.state = CaseState.ApprovedForAccommodations;
+    this.stateChangedAt = now;
+
+    this.domainEvents.push(new IntakeSkipped(this.caseId, actorId, now));
     this.domainEvents.push(
-      new CaseApprovedForAccommodations(this.caseId, actorId, new Date()),
+      new CaseApprovedForAccommodations(this.caseId, actorId, now),
     );
+
+    this.assertInvariants();
   }
 
   approveIntake(actorId: PersonId): void {
@@ -246,17 +256,19 @@ export default class Case {
       throw new Error("Case must be under review");
     }
 
+    const now = new Date();
+
     this.intake.approve();
 
     this.state = CaseState.ApprovedForAccommodations;
-    this.stateChangedAt = new Date();
+    this.stateChangedAt = now;
 
+    this.domainEvents.push(new IntakeApproved(this.caseId, actorId, now));
     this.domainEvents.push(
-      new IntakeApproved(this.caseId, actorId, new Date()),
+      new CaseApprovedForAccommodations(this.caseId, actorId, now),
     );
-    this.domainEvents.push(
-      new CaseApprovedForAccommodations(this.caseId, actorId, new Date()),
-    );
+
+    this.assertInvariants();
   }
 
   denyIntake(actorId: PersonId): void {
@@ -264,10 +276,19 @@ export default class Case {
       throw new Error("No intake exists");
     }
 
-    this.intake.deny();
-    this.close(ClosedStatus.DeniedIntake, actorId);
+    if (this.state !== CaseState.IntakeUnderReview) {
+      throw new Error("Case must be under review");
+    }
 
-    this.domainEvents.push(new IntakeDenied(this.caseId, actorId, new Date()));
+    const now = new Date();
+
+    this.intake.deny();
+
+    this.domainEvents.push(new IntakeDenied(this.caseId, actorId, now));
+
+    this.close(ClosedStatus.DeniedIntake, actorId, now);
+
+    this.assertInvariants();
   }
 
   withdrawIntake(actorId: PersonId): void {
@@ -275,12 +296,19 @@ export default class Case {
       throw new Error("No intake exists");
     }
 
-    this.intake.withdraw();
-    this.close(ClosedStatus.Withdrawn, actorId);
+    if (this.state !== CaseState.IntakeUnderReview) {
+      throw new Error("Case must be under review");
+    }
 
-    this.domainEvents.push(
-      new IntakeWithdrawn(this.caseId, actorId, new Date()),
-    );
+    const now = new Date();
+
+    this.intake.withdraw();
+
+    this.domainEvents.push(new IntakeWithdrawn(this.caseId, actorId, now));
+
+    this.close(ClosedStatus.Withdrawn, actorId, now);
+
+    this.assertInvariants();
   }
 
   abandonIntake(actorId: PersonId): void {
@@ -288,29 +316,44 @@ export default class Case {
       throw new Error("No intake exists");
     }
 
-    this.intake.withdraw();
-    this.close(ClosedStatus.Abandoned, actorId);
-
-    this.domainEvents.push(
-      new IntakeAbandoned(this.caseId, actorId, new Date()),
-    );
-  }
-
-  close(reason: ClosedStatus, actorId: PersonId): void {
-    if (this.state === CaseState.Closed) {
-      throw new Error("Case already closed");
+    if (this.state !== CaseState.IntakeUnderReview) {
+      throw new Error("Case must be under review");
     }
 
+    const now = new Date();
+
+    this.intake.abandon();
+
+    this.domainEvents.push(new IntakeAbandoned(this.caseId, actorId, now));
+
+    this.close(ClosedStatus.Abandoned, actorId, now);
+
+    this.assertInvariants();
+  }
+
+  cancelCase(actorId: PersonId): void {
+    if (this.state !== CaseState.AdminCreated) {
+      throw new Error("Case cannot be cancelled from this state");
+    }
+
+    const now = new Date();
+
+    this.domainEvents.push(new CaseCancelled(this.caseId, actorId, now));
+
+    this.close(ClosedStatus.Cancelled, actorId, now);
+
+    this.assertInvariants();
+  }
+
+  private close(reason: ClosedStatus, actorId: PersonId, now: Date): void {
     this.state = CaseState.Closed;
-    this.stateChangedAt = new Date();
+    this.stateChangedAt = now;
 
     this.closedStatus = reason;
-    this.closedAt = new Date();
+    this.closedAt = now;
     this.closedBy = actorId;
 
-    this.domainEvents.push(
-      new CaseClosed(this.caseId, reason, actorId, new Date()),
-    );
+    this.domainEvents.push(new CaseClosed(this.caseId, reason, actorId, now));
   }
 
   reopen(actorId: PersonId, reason: string): void {
@@ -318,36 +361,40 @@ export default class Case {
       throw new Error("Only closed cases can be reopened");
     }
 
-    switch (this.closedStatus) {
-      case ClosedStatus.DeniedIntake:
-      case ClosedStatus.Withdrawn:
-      case ClosedStatus.Abandoned:
-      case ClosedStatus.AccommodationsComplete:
-        this.state = CaseState.ApprovedForAccommodations;
-        break;
-      default:
-        throw new Error("Cannot reopen case from its current closed status");
+    if (this.closedStatus !== ClosedStatus.AccommodationsComplete) {
+      throw new Error("Only completed cases can be reopened");
     }
 
-    this.stateChangedAt = new Date();
+    const now = new Date();
+
+    this.state = CaseState.ApprovedForAccommodations;
+    this.stateChangedAt = now;
 
     this.closedStatus = undefined;
     this.closedAt = undefined;
     this.closedBy = undefined;
 
-    this.reopenedAt = new Date();
+    this.reopenedAt = now;
     this.reopenedBy = actorId;
     this.reopenedReason = reason;
 
-    this.domainEvents.push(new CaseReopened(this.caseId, actorId, new Date()));
+    this.domainEvents.push(new CaseReopened(this.caseId, actorId, now));
+
+    this.assertInvariants();
   }
 
   addNote(note: CaseNote): void {
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
+    }
+
     this.notes.push(note);
 
     this.domainEvents.push(
       new CaseNoteAdded(this.caseId, note.getNoteId(), new Date()),
     );
+
+    this.assertInvariants();
   }
 
   assignAdmin(
@@ -355,23 +402,18 @@ export default class Case {
     role: CaseAssignmentRole,
     actorId: PersonId,
   ): void {
-    if (
-      this.assignments.some(
-        (a) => a.getPersonId().equals(personId) && a.isActive(),
-      )
-    ) {
-      throw new Error("Admin already assigned");
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
     }
 
-    if (
-      role === CaseAssignmentRole.Primary &&
-      this.assignments.some((a) => a.isPrimary() && a.isActive())
-    ) {
-      throw new Error("Case already has a primary admin");
-    }
+    // if (
+    //   role === CaseAssignmentRole.Primary &&
+    //   this.assignments.some((a) => a.isPrimary() && a.isActive())
+    // ) {
+    //   throw new Error("Case already has a primary admin");
+    // }
 
-    const assignment = CaseAssignment.assign(personId, role, actorId);
-    this.assignments.push(assignment);
+    const now = new Date();
 
     if (this.state === CaseState.IntakeSubmitted) {
       if (!this.intake) {
@@ -380,22 +422,28 @@ export default class Case {
 
       this.intake.moveToUnderReview();
       this.state = CaseState.IntakeUnderReview;
-      this.stateChangedAt = new Date();
+      this.stateChangedAt = now;
 
-      this.domainEvents.push(
-        new IntakeUnderReview(this.caseId, personId, new Date()),
-      );
-      this.domainEvents.push(
-        new CaseUnderReview(this.caseId, personId, new Date()),
-      );
+      this.domainEvents.push(new IntakeUnderReview(this.caseId, actorId, now));
+
+      this.domainEvents.push(new CaseUnderReview(this.caseId, actorId, now));
     }
 
+    const assignment = CaseAssignment.assign(personId, role, actorId);
+    this.assignments.push(assignment);
+
     this.domainEvents.push(
-      new CaseAssignmentAdded(this.caseId, personId, role, new Date()),
+      new CaseAssignmentAdded(this.caseId, personId, role, now),
     );
+
+    this.assertInvariants();
   }
 
   unassignAdmin(personId: PersonId, actorId: PersonId): void {
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
+    }
+
     const activeAssignments = this.assignments.filter((a) => a.isActive());
     const target = activeAssignments.find((a) =>
       a.getPersonId().equals(personId),
@@ -405,15 +453,15 @@ export default class Case {
       throw new Error("Active assignment not found");
     }
 
-    if (
-      target.isPrimary() &&
-      this.state !== CaseState.IntakeSubmitted &&
-      activeAssignments.length === 1
-    ) {
-      throw new Error(
-        "Cannot remove the only active primary admin from this case",
-      );
-    }
+    // if (
+    //   target.isPrimary() &&
+    //   this.state !== CaseState.IntakeSubmitted &&
+    //   activeAssignments.length === 1
+    // ) {
+    //   throw new Error(
+    //     "Cannot remove the only active primary admin from this case",
+    //   );
+    // }
 
     this.assignments = this.assignments.map((a) => {
       if (a.getPersonId().equals(personId) && a.isActive()) {
@@ -425,19 +473,122 @@ export default class Case {
     this.domainEvents.push(
       new CaseAssignmentRemoved(this.caseId, personId, new Date()),
     );
+
+    this.assertInvariants();
+  }
+
+  transferPrimaryAdmin(
+    fromPersonId: PersonId,
+    toPersonId: PersonId,
+    actorId: PersonId,
+  ): void {
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
+    }
+
+    const now = new Date();
+
+    const currentPrimary = this.assignments.find(
+      (a) =>
+        a.isActive() && a.isPrimary() && a.getPersonId().equals(fromPersonId),
+    );
+
+    if (!currentPrimary) {
+      throw new Error("Current primary admin not found");
+    }
+
+    const targetSupport = this.assignments.find(
+      (a) =>
+        a.isActive() && a.isSupport() && a.getPersonId().equals(toPersonId),
+    );
+
+    if (!targetSupport) {
+      throw new Error("Target admin must be an active support admin");
+    }
+
+    // Unassign both current roles
+    this.assignments = this.assignments.map((a) => {
+      if (
+        a.isActive() &&
+        (a.getPersonId().equals(fromPersonId) ||
+          a.getPersonId().equals(toPersonId))
+      ) {
+        return a.unassign(actorId);
+      }
+      return a;
+    });
+
+    // Create swapped roles
+    const newPrimary = CaseAssignment.assign(
+      toPersonId,
+      CaseAssignmentRole.Primary,
+      actorId,
+    );
+
+    const newSupport = CaseAssignment.assign(
+      fromPersonId,
+      CaseAssignmentRole.Support,
+      actorId,
+    );
+
+    this.assignments.push(newPrimary);
+    this.assignments.push(newSupport);
+
+    // Domain events
+    this.domainEvents.push(
+      new CaseAssignmentRemoved(this.caseId, fromPersonId, now),
+    );
+
+    this.domainEvents.push(
+      new CaseAssignmentRemoved(this.caseId, toPersonId, now),
+    );
+
+    this.domainEvents.push(
+      new CaseAssignmentAdded(
+        this.caseId,
+        toPersonId,
+        CaseAssignmentRole.Primary,
+        now,
+      ),
+    );
+
+    this.domainEvents.push(
+      new CaseAssignmentAdded(
+        this.caseId,
+        fromPersonId,
+        CaseAssignmentRole.Support,
+        now,
+      ),
+    );
+
+    this.domainEvents.push(
+      new CasePrimaryAdminTransferred(
+        this.caseId,
+        fromPersonId,
+        toPersonId,
+        actorId,
+        now,
+      ),
+    );
+
+    this.assertInvariants();
   }
 
   addDisability(
     studentDisabilityId: StudentDisabilityId,
     actorId: PersonId,
   ): void {
-    if (
-      this.disabilities.some((d) =>
-        d.getStudentDisabilityId().equals(studentDisabilityId),
-      )
-    ) {
-      throw new Error("Disability already added");
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
     }
+
+    // if (
+    //   this.disabilities.some((d) =>
+    //     d.getStudentDisabilityId().equals(studentDisabilityId),
+    //   )
+    // ) {
+    //   throw new Error("Disability already added");
+    // }
 
     const disability = CaseDisability.createNew(studentDisabilityId, actorId);
     this.disabilities.push(disability);
@@ -445,9 +596,15 @@ export default class Case {
     this.domainEvents.push(
       new CaseDisabilityAdded(this.caseId, studentDisabilityId, new Date()),
     );
+
+    this.assertInvariants();
   }
 
   setPrimaryDisability(studentDisabilityId: StudentDisabilityId): void {
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
+    }
+
     if (
       !this.disabilities.some((d) =>
         d.getStudentDisabilityId().equals(studentDisabilityId),
@@ -469,11 +626,17 @@ export default class Case {
         new Date(),
       ),
     );
+
+    this.assertInvariants();
   }
 
   // Invariants
   private assertInvariants(): void {
-    // Closed Status
+    /*
+     * -------------------------------------------------
+     * Closed state metadata
+     * -------------------------------------------------
+     */
     if (this.state === CaseState.Closed) {
       if (!this.closedStatus || !this.closedAt || !this.closedBy) {
         throw new Error("Closed case must have close metadata");
@@ -484,9 +647,93 @@ export default class Case {
       }
     }
 
-    // Case Assignments
-    const activePrimaryAssignments = this.assignments.filter(
-      (a) => a.isActive() && a.isPrimary(),
+    /*
+     * -------------------------------------------------
+     * Reopen metadata consistency
+     * -------------------------------------------------
+     */
+    if (
+      (this.reopenedAt && (!this.reopenedBy || !this.reopenedReason)) ||
+      ((this.reopenedBy || this.reopenedReason) && !this.reopenedAt)
+    ) {
+      throw new Error("Reopen metadata must be all-or-nothing");
+    }
+
+    /*
+     * -------------------------------------------------
+     * Intake presence vs case state
+     * -------------------------------------------------
+     */
+    if (this.state === CaseState.AdminCreated && this.intake) {
+      throw new Error("Admin created cases cannot have an intake");
+    }
+
+    if (
+      (this.state === CaseState.IntakeSubmitted ||
+        this.state === CaseState.IntakeUnderReview) &&
+      !this.intake
+    ) {
+      throw new Error("Intake states require an intake to exist");
+    }
+
+    /*
+     * -------------------------------------------------
+     * Case state ↔ Intake state synchronization
+     * -------------------------------------------------
+     */
+    if (this.intake) {
+      const intakeState = this.intake.getState();
+
+      if (this.state === CaseState.IntakeSubmitted) {
+        if (intakeState !== IntakeState.Submitted) {
+          throw new Error("IntakeSubmitted case must have submitted intake");
+        }
+      }
+
+      if (this.state === CaseState.IntakeUnderReview) {
+        if (intakeState !== IntakeState.UnderReview) {
+          throw new Error(
+            "IntakeUnderReview case must have intake under review",
+          );
+        }
+      }
+
+      if (this.state === CaseState.ApprovedForAccommodations && this.intake) {
+        if (intakeState !== IntakeState.Approved) {
+          throw new Error(
+            "Approved cases with intake must have approved intake",
+          );
+        }
+      }
+
+      if (this.closedStatus === ClosedStatus.DeniedIntake) {
+        if (intakeState !== IntakeState.Denied) {
+          throw new Error("Denied cases must have denied intake");
+        }
+      }
+
+      if (this.closedStatus === ClosedStatus.Withdrawn) {
+        if (intakeState !== IntakeState.Withdrawn) {
+          throw new Error("Withdrawn cases must have withdrawn intake");
+        }
+      }
+
+      if (this.closedStatus === ClosedStatus.Abandoned) {
+        if (intakeState !== IntakeState.Abandoned) {
+          throw new Error("Abandoned cases must have abandoned intake");
+        }
+      }
+    }
+
+    /*
+     * -------------------------------------------------
+     * Assignment invariants
+     * -------------------------------------------------
+     */
+    const activeAssignments = this.assignments.filter((a) => a.isActive());
+
+    const activePrimaryAssignments = activeAssignments.filter((a) =>
+      a.isPrimary(),
     );
 
     if (activePrimaryAssignments.length > 1) {
@@ -496,14 +743,21 @@ export default class Case {
     if (this.state !== CaseState.IntakeSubmitted) {
       if (activePrimaryAssignments.length !== 1) {
         throw new Error(
-          "Case must have exactly one active primary admin unless it is intake submitted",
+          "Case must have exactly one active primary admin unless intake submitted",
         );
       }
     }
 
-    const activeAssignmentPersonIds = this.assignments
-      .filter((a) => a.isActive())
-      .map((a) => a.getPersonId().toString());
+    if (
+      this.state === CaseState.IntakeSubmitted &&
+      activeAssignments.length !== 0
+    ) {
+      throw new Error("IntakeSubmitted cases cannot have assigned admins");
+    }
+
+    const activeAssignmentPersonIds = activeAssignments.map((a) =>
+      a.getPersonId().toString(),
+    );
 
     if (
       new Set(activeAssignmentPersonIds).size !==
@@ -512,7 +766,11 @@ export default class Case {
       throw new Error("Case cannot have duplicate active assignments");
     }
 
-    // Disabilities
+    /*
+     * -------------------------------------------------
+     * Disability invariants
+     * -------------------------------------------------
+     */
     const disabilityIds = this.disabilities.map((d) =>
       d.getStudentDisabilityId().toString(),
     );

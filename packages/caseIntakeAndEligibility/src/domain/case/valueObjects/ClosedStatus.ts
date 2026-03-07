@@ -3,4 +3,5 @@ export enum ClosedStatus {
   Withdrawn = "WITHDRAWN",
   Abandoned = "ABANDONED",
   AccommodationsComplete = "ACCOMMODATIONS_COMPLETE",
+  Cancelled = "Cancelled",
 }

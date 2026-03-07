@@ -56,6 +56,19 @@ export class Intake {
     this.state = IntakeState.Withdrawn;
   }
 
+  abandon(): void {
+    if (
+      this.state !== IntakeState.Submitted &&
+      this.state !== IntakeState.UnderReview
+    ) {
+      throw new Error(
+        "Only submitted or under review intakes can be abandoned",
+      );
+    }
+
+    this.state = IntakeState.Abandoned;
+  }
+
   getState(): IntakeState {
     return this.state;
   }

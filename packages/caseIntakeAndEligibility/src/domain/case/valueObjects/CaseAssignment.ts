@@ -81,7 +81,7 @@ export class CaseAssignment {
   }
 
   isSupport(): boolean {
-    return this.role === CaseAssignmentRole.Primary;
+    return this.role === CaseAssignmentRole.Support;
   }
 
   getPersonId(): PersonId {
