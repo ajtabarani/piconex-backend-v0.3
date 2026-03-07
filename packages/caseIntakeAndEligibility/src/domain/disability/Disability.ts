@@ -2,6 +2,7 @@ import {
     PersonId,
     DisabilityId,
     DisabilityCreated,
+    DisabilityDescriptionUpdated,
     DomainEvent
 } from "../shared";
 
@@ -13,8 +14,8 @@ export default class Disability {
     private readonly createdAt: Date;
     private readonly createdBy: PersonId;
 
-    private readonly updatedAt?: Date;
-    private readonly updatedBy?: PersonId;
+    private updatedAt?: Date;
+    private updatedBy?: PersonId;
 
     private domainEvents: DomainEvent[] = [];
 
@@ -70,8 +71,8 @@ export default class Disability {
         description: string,
         createdAt: Date,
         createdBy: PersonId,
-        updatedAt: Date,
-        updatedBy: PersonId
+        updatedAt?: Date,
+        updatedBy?: PersonId
     ): Disability {
         return new Disability(
             disabilityId,
@@ -84,6 +85,32 @@ export default class Disability {
         )
     }
 
+    // Commands
+    updateDescription(
+        description: string,
+        actorId: PersonId
+    ): void {
+        if (!description || description.trim().length === 0) {
+            throw new Error("Description cannot be empty");
+        }
+
+        const now = new Date();
+
+        this.description = description;
+        this.updatedAt = now;
+        this.updatedBy = actorId;
+        this.domainEvents.push(
+            new DisabilityDescriptionUpdated(
+                this.disabilityId,
+                actorId,
+                now
+            )
+        );
+
+        this.assertInvariants();
+    }
+
+    // Invariants
     private assertInvariants(): void {
         if (!this.name || this.name.trim().length === 0) {
             throw new Error("Disability name cannot be empty");
@@ -92,5 +119,12 @@ export default class Disability {
         if (!this.description || this.description.trim().length === 0) {
             throw new Error("Disability description cannot be empty");
         }
+    }
+
+    // Read Interfaces
+    pullDomainEvents(): readonly DomainEvent[] {
+        const events = this.domainEvents;
+        this.domainEvents = [];
+        return events;
     }
 }
