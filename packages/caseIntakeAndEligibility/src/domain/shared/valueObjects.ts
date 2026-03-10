@@ -63,3 +63,13 @@ export class DisabilityId extends StringValueObject {
     return new DisabilityId(value);
   }
 }
+
+export class FlagId extends StringValueObject {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value: string): FlagId {
+    return new FlagId(value);
+  }
+}
