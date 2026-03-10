@@ -1,7 +1,7 @@
 import { FlagId } from "../shared";
 import Flag from "./Flag";
 
-export interface CaseRepository {
+export interface FlagRepository {
   load(id: FlagId): Promise<Flag>;
   save(thread: Flag): Promise<void>;
 }
