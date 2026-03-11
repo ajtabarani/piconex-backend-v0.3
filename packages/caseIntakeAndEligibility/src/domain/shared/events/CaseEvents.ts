@@ -160,6 +160,16 @@ export class CaseDisabilityAdded implements DomainEvent {
     public readonly caseId: CaseId,
     public readonly studentDisabilityId: StudentDisabilityId,
     public readonly occurredAt: Date,
+    public readonly addedBy: PersonId,
+  ) {}
+}
+
+export class CaseDisabilityRemoved implements DomainEvent {
+  constructor(
+    public readonly caseId: CaseId,
+    public readonly studentDisabilityId: StudentDisabilityId,
+    public readonly occurredAt: Date,
+    public readonly addedBy: PersonId,
   ) {}
 }
 
@@ -168,5 +178,15 @@ export class CasePrimaryDisabilitySet implements DomainEvent {
     public readonly caseId: CaseId,
     public readonly studentDisabilityId: StudentDisabilityId,
     public readonly occurredAt: Date,
+    public readonly addedBy: PersonId,
+  ) {}
+}
+
+export class CasePrimaryDisabilityDemoted implements DomainEvent {
+  constructor(
+    public readonly caseId: CaseId,
+    public readonly studentDisabilityId: StudentDisabilityId,
+    public readonly occurredAt: Date,
+    public readonly addedBy: PersonId,
   ) {}
 }

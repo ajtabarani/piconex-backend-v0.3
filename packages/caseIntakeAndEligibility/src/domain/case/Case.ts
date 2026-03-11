@@ -21,7 +21,9 @@ import {
   CaseAssignmentRemoved,
   CasePrimaryAdminTransferred,
   CaseDisabilityAdded,
+  CaseDisabilityRemoved,
   CasePrimaryDisabilitySet,
+  CasePrimaryDisabilityDemoted,
   DomainEvent,
 } from "../shared";
 
@@ -594,13 +596,53 @@ export default class Case {
     this.disabilities.push(disability);
 
     this.domainEvents.push(
-      new CaseDisabilityAdded(this.caseId, studentDisabilityId, new Date()),
+      new CaseDisabilityAdded(
+        this.caseId,
+        studentDisabilityId,
+        new Date(),
+        actorId,
+      ),
     );
 
     this.assertInvariants();
   }
 
-  setPrimaryDisability(studentDisabilityId: StudentDisabilityId): void {
+  removeDisability(
+    studentDisabilityId: StudentDisabilityId,
+    actorId: PersonId,
+  ): void {
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
+    }
+
+    const exists = this.disabilities.some((d) =>
+      d.getStudentDisabilityId().equals(studentDisabilityId),
+    );
+
+    if (!exists) {
+      throw new Error("Disability not associated with case");
+    }
+
+    this.disabilities = this.disabilities.filter(
+      (d) => !d.getStudentDisabilityId().equals(studentDisabilityId),
+    );
+
+    this.domainEvents.push(
+      new CaseDisabilityRemoved(
+        this.caseId,
+        studentDisabilityId,
+        new Date(),
+        actorId,
+      ),
+    );
+
+    this.assertInvariants();
+  }
+
+  setPrimaryDisability(
+    studentDisabilityId: StudentDisabilityId,
+    actorId: PersonId,
+  ): void {
     if (this.state === CaseState.Closed) {
       throw new Error("Cannot modify a closed case");
     }
@@ -624,6 +666,45 @@ export default class Case {
         this.caseId,
         studentDisabilityId,
         new Date(),
+        actorId,
+      ),
+    );
+
+    this.assertInvariants();
+  }
+
+  demotePrimaryDisability(
+    studentDisabilityId: StudentDisabilityId,
+    actorId: PersonId,
+  ): void {
+    if (this.state === CaseState.Closed) {
+      throw new Error("Cannot modify a closed case");
+    }
+
+    const target = this.disabilities.find((d) =>
+      d.getStudentDisabilityId().equals(studentDisabilityId),
+    );
+
+    if (!target) {
+      throw new Error("Disability not associated with case");
+    }
+
+    if (!target.isPrimaryDisability()) {
+      throw new Error("Disability is not primary");
+    }
+
+    this.disabilities = this.disabilities.map((d) =>
+      d.getStudentDisabilityId().equals(studentDisabilityId)
+        ? d.removePrimary()
+        : d,
+    );
+
+    this.domainEvents.push(
+      new CasePrimaryDisabilityDemoted(
+        this.caseId,
+        studentDisabilityId,
+        new Date(),
+        actorId,
       ),
     );
 
@@ -779,13 +860,13 @@ export default class Case {
       throw new Error("Case cannot have duplicate disabilities");
     }
 
-    const primaryDisabilities = this.disabilities.filter((d) =>
-      d.isPrimaryDisability(),
-    );
+    //   const primaryDisabilities = this.disabilities.filter((d) =>
+    //     d.isPrimaryDisability(),
+    //   );
 
-    if (primaryDisabilities.length > 1) {
-      throw new Error("Only one primary disability allowed");
-    }
+    //   if (primaryDisabilities.length > 1) {
+    //     throw new Error("Only one primary disability allowed");
+    //   }
   }
 
   // Read Interfaces

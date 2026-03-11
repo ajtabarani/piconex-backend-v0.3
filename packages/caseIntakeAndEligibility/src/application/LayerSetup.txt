@@ -1,0 +1,42 @@
+application/
+  case/
+    requests/
+
+      openCaseByAdmin/
+      openCaseFromStudentIntake/
+
+      submitIntake/
+      skipIntake/
+      approveIntake/
+      denyIntake/
+      withdrawIntake/
+      abandonIntake/
+
+      cancelCase/
+      reopenCase/
+
+      addCaseNote/
+
+      assignAdminToCase/
+      unassignAdminFromCase/
+      transferPrimaryAdmin/
+
+      addDisabilityToCase/
+      setPrimaryCaseDisability/
+      removeDisabilityFromCase/
+      demotePrimaryCaseDisability/
+
+      addCaseFlag/
+      removeCaseFlag/
+
+    queries/
+
+      getCase/
+      getCasesForStudent/
+      getCasesForAdmin/
+
+      getCaseAssignments/
+      getCaseNotes/
+      getCaseDisabilities/
+
+  disability/
