@@ -1,11 +1,11 @@
-import { PersonId } from "../../domain";
-import { PersonAuthorizationSnapshot } from "../policies";
 import {
+  PersonAuthorizationSnapshot,
   PersonDTO,
   AdminProfileDTO,
   FacultyProfileDTO,
   StudentProfileDTO,
-} from "../queries";
+} from "../../application";
+import { PersonId } from "../../domain";
 
 export interface PersonQueryService {
   getPersonById(

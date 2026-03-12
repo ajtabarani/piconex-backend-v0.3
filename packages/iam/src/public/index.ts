@@ -1,6 +1,7 @@
 export {
   AuthorizationService,
+  PersonQueryService,
   PersonAuthorizationSnapshot,
 } from "../application";
 
-export { PersonId, Role } from "../domain";
+export { PersonId, Role as PersonRole } from "../domain";

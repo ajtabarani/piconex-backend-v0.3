@@ -1,11 +1,11 @@
-import { PersonId, Role } from "../../domain";
-import { AuthorizationService } from "../ohs";
-import { PersonAuthorizationSnapshot } from "../policies";
 import {
+  AuthorizationService,
   CheckPersonHasRole,
   CheckPersonIsActive,
   GetPersonAuthorizationSnapshot,
-} from "../queries";
+  PersonAuthorizationSnapshot,
+} from "../../application";
+import { PersonId, Role } from "../../domain";
 
 export class AuthorizationServiceImpl implements AuthorizationService {
   constructor(
