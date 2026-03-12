@@ -1,0 +1,94 @@
+CASE COMMAND AUTHORIZATION RULES
+
+openCaseByAdmin - Allowed by: Admin or SuperAdmin
+
+openCaseFromStudentIntake - Allowed by: Student only
+
+
+
+submitIntake - Allowed by: Student only
+
+skipIntake - Allowed by: Primary Admin assigned to the case OR
+SuperAdmin
+
+approveIntake - Allowed by: Primary Admin assigned to the case OR
+SuperAdmin
+
+denyIntake - Allowed by: Primary Admin assigned to the case OR
+SuperAdmin
+
+withdrawIntake - Allowed by: Student who owns the case
+
+abandonIntake - Allowed by: System
+
+cancelCase - Allowed by: Primary Admin assigned to the case OR
+SuperAdmin
+
+reopenCase - Allowed by: Primary Admin assigned to the case OR
+SuperAdmin
+
+
+
+addCaseNote - Allowed by: Any Admin assigned to the case
+
+
+
+assignAdminToCase - Allowed by: 1. An Admin assigning themselves to a
+case that currently has no assignment 2. SuperAdmin 3. After a Primary
+Admin exists: Primary Admin OR SuperAdmin
+
+unassignAdminFromCase - Allowed by: Primary Admin OR SuperAdmin
+
+transferPrimaryAdmin - Allowed by: Primary Admin OR SuperAdmin
+
+
+
+addDisabilityToCase - Allowed by: Any Admin assigned to the case
+
+setPrimaryCaseDisability - Allowed by: Any Admin assigned to the case
+
+removeDisabilityFromCase - Allowed by: Any Admin assigned to the case
+
+demotePrimaryCaseDisability - Allowed by: Any Admin assigned to the case
+
+
+
+addCaseFlag - Allowed by: Any Admin assigned to the case
+
+removeCaseFlag - Allowed by: Any Admin assigned to the case
+
+
+
+REUSABLE POLICY LIST
+
+These reusable rules can be composed to implement all command checks.
+
+isStudent(actor) - Actor has an active Student role
+
+isAdmin(actor) - Actor has an active Admin role
+
+isSuperAdmin(actor) - Actor has SuperAdmin flag
+
+
+
+isCaseOwner(actor, case) - Actor.personId equals case.studentId
+
+isAssignedAdmin(actor, case) - Actor is an Admin assigned to the case
+
+isPrimaryAdmin(actor, case) - Actor is the Primary Admin assigned to the
+case
+
+isSystemActor(actor) - Actor represents system automation
+
+
+
+caseHasNoAssignments(case) - Case currently has zero admin assignments
+
+canAssignSelfToUnassignedCase(actor, case) - Actor is Admin AND
+caseHasNoAssignments(case)
+
+canManageCaseAsPrimary(actor, case) - isPrimaryAdmin(actor, case) OR
+isSuperAdmin(actor)
+
+canOperateOnCase(actor, case) - isAssignedAdmin(actor, case) OR
+isSuperAdmin(actor)

@@ -1,6 +1,9 @@
 {
-  "name": "@piconex/caseintake",
+  "name": "@piconex/case",
   "version": "1.0.0",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@piconex/iam": "*"
+  }
 }
